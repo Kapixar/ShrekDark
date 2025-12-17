@@ -1,3 +1,6 @@
+const font = new FontFace("Halo", "url('chrome-extension://__MSG_@@extension_id__/Halo.ttf')");
+document.fonts.add(font);
+
 var Fmanager = false;
 var manager = true;
 var cShip = '';
@@ -132,7 +135,7 @@ observeNode(manage, () => {
 
 chrome.storage.sync.get("key", function (result) {
     let arr = result.key;
-    if (arr == null || arr.length != 6) arr = [1, "q", "r", "", "", ""];
+    if (arr == null || arr.length != 6) arr = [1, "q", "r", "", "", "", 1];
     if (arr[0]) {
         document.addEventListener('keydown', async (event) => {
             if (!document.title.includes("- Deep")) {
@@ -149,23 +152,7 @@ chrome.storage.sync.get("key", function (result) {
             };
             const key = event.key.toUpperCase();
             if (!event.shiftKey && key === 'TAB') showPlayerList();
-            if (event.shiftKey) {
-                if (key === arr[1].toUpperCase()) exit.click();
-                else if (key === arr[2].toUpperCase()) rejoin.click();
-                else if (key === arr[5].toUpperCase()) switchTXT();
-    
-                if (!isCap()) return;
-                if (key === 'ARROWDOWN') changeGravity(3);
-                else if (key === 'ARROWUP') changeGravity(0);
-                else if (key === 'ARROWLEFT') changeGravity(1);
-                else if (key === 'ARROWRIGHT') changeGravity(2);
-                else if (key === 'TAB') {
-                    event.preventDefault();
-                    manage.click();
-                }
-                else if (key === arr[3].toUpperCase()) zeroGravity();
-                else if (key === arr[4].toUpperCase()) saveShip();
-            }
+            if (event.shiftKey) handleKeyPress(event, arr, key);
         }, false);
     } else {
         document.addEventListener('keydown', async (event) => {
@@ -183,24 +170,7 @@ chrome.storage.sync.get("key", function (result) {
             };
             const key = event.key.toUpperCase();
             if (!event.ctrlKey && key === 'TAB') showPlayerList();
-            if (event.ctrlKey) {
-                if (key === arr[1].toUpperCase()) exit.click();
-                else if (key === arr[2].toUpperCase()) rejoin.click();
-                else if (key === arr[5].toUpperCase()) switchTXT();
-    
-                if (!isCap()) return;
-                if (key === 'ARROWDOWN') changeGravity(3);
-                else if (key === 'ARROWUP') changeGravity(0);
-                else if (key === 'ARROWLEFT') changeGravity(1);
-                else if (key === 'ARROWRIGHT') changeGravity(2);
-                else if (key === 'TAB') {
-                    event.preventDefault();
-                    manage.click();
-                }
-                else if (key === arr[3].toUpperCase()) zeroGravity();
-                else if (key === arr[4].toUpperCase()) saveShip();
-
-            }
+            if (event.ctrlKey) handleKeyPress(event, arr, key);
         }, false);
     }
     document.addEventListener('keyup', async (event) => {
@@ -215,6 +185,24 @@ chrome.storage.sync.get("key", function (result) {
         }
     })
 });
+
+function handleKeyPress(ev, arr, key) {
+    if (key === arr[1].toUpperCase()) exit.click();
+    else if (key === arr[2].toUpperCase()) rejoin.click();
+    else if (key === arr[5].toUpperCase()) switchTXT();
+
+    if (!isCap()) return;
+    if (key === 'ARROWDOWN') changeGravity(3);
+    else if (key === 'ARROWUP') changeGravity(0);
+    else if (key === 'ARROWLEFT') changeGravity(1);
+    else if (key === 'ARROWRIGHT') changeGravity(2);
+    else if (key === 'TAB') {
+        ev.preventDefault();
+        manage.click();
+    }
+    else if (key === arr[3].toUpperCase()) zeroGravity();
+    else if (key === arr[4].toUpperCase()) saveShip();
+}
 
 var gravityShips = {};
 chrome.storage.sync.get("gravity", function (result) {

@@ -266,3 +266,23 @@ Chat:
 - fixed chat resizing bugging out
 - fixed scrollbar background color
 - restricted easter egg message
+
+4.0 TODO:
+- fix empty strings in settings getting reseted or allowed
+- remake menu
+- add ship tags
+- upgrade ship search
+- make saved ships more distinct
+- be able to right click to open ship in new tab
+- new ship sorting:
+    - by crew
+    - by tag
+    - by name
+    - by color
+    - by last joined
+    - 
+- ping player that is active in another ship
+
+- option to disable/ set garavity hotkeys
+- hotkey to swithcuing ammo mode
+- be able to use one webhook more than once

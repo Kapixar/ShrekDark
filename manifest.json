@@ -37,7 +37,7 @@
     },
     "web_accessible_resources": [
         { 
-            "resources": ["shrekPack.zip", "https://api.npoint.io/*", "/huge_signs/mosaic.png"],
+            "resources": ["shrekPack.zip", "https://api.npoint.io/*", "/huge_signs/mosaic.png", "Halo.ttf", "Sen-Regular.ttf"],
             "matches": ["https://*.drednot.io/*"]
         }
     ]

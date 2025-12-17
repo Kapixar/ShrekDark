@@ -56,10 +56,29 @@ body .dark, #chat:not(.closed), .closed .recent{
 
 body button,
 body .btn {
-    display: inline-block;
+    /* display: inline-block;
     border: none;
     box-shadow: 0 3px #333;
-    transition: transform 150ms, box-shadow 150ms, visibility 0s, opacity 200ms;
+    transition: transform 150ms, box-shadow 150ms, visibility 0s, opacity 200ms; */
+    --buttonMain: #333;
+    --buttonSecondary: #a2a2a2;
+    color: var(--buttonSecondary) !important;
+    background: var(--buttonMain) !important;
+    border-radius: 5px;
+    outline: 1px solid transparent;
+    outline-offset: 2px;
+    border: none;
+    text-transform: capitalize;
+    font-weight: 600;
+    font-size: .8em;
+    padding: .5em;
+    text-shadow: 0px 1px 0px hsla(0, 0%, 100%, 15%);
+    transition: all 250ms;
+}
+
+body button:hover,
+body .btn:hover {
+    filter: brightness(1.2);
 }
 
 button[style='display: none;'] {
@@ -72,19 +91,46 @@ button[style='display: none;'] {
 
 button:hover,
 body .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px #333;
-}
-
-button:active,
-body .btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px #333;
+    outline: 1px solid var(--buttonSecondary);
+    outline-offset: 2px;
+    /* border: 1px solid var(--buttonSecondary); */
 }
 
 button a {
     text-decoration: none !important;
     color: white !important;
+}
+
+body .btn-green {
+    /* --buttonMain: #1b3629;
+    --buttonSecondary: #2cd195; */
+    --buttonMain: #093707;
+    --buttonSecondary: #4a4;
+    background: var(--buttonMain) !important;
+}
+
+body .btn-red {
+    --buttonMain: #390505;
+    --buttonSecondary: #a44;
+    background: var(--buttonMain) !important;
+}
+
+body .btn-orange {
+    --buttonMain: #3e2806;
+    --buttonSecondary: #b84;
+    background: var(--buttonMain) !important;
+}
+
+body .btn-yellow {
+    --buttonMain: #3f3b05;
+    --buttonSecondary: #b0b03d;
+    background: var(--buttonMain) !important;
+}
+
+body .btn-pink {
+    --buttonMain: #2e053f;
+    --buttonSecondary: #a4a;
+    background: var(--buttonMain) !important;
 }
 
 .btn-purple {
@@ -162,7 +208,7 @@ button a {
 #item-ui,
 #chat,
 .shipyard-item {
-    border-radius: 10px !important
+    border-radius: 10px !important;
 }
 
 /* Motd */
@@ -697,22 +743,75 @@ body:not(:has(#rejoin_button.dnone)) #chat.closed #chat-content p[data-miss] {
     background-position: center;
 }
 
+.shipyard-bin .shipyard-item > .sy-title {
+    display: flex;
+    gap: .3em;
+    flex-direction: row-reverse;
+    padding: .3em;
+}
+
+.shipyard-bin .shipyard-item > .sy-title h3 {
+    flex-grow: 1;
+    border-radius: 10px;
+    backdrop-filter: blur(2px);
+    text-align: center;
+}
+
+.shipyard-bin .shipyard-item > .sy-title span {
+    padding: 5px;
+    border-radius: 10px;
+    backdrop-filter: blur(2px);
+    text-align: center;
+    font-size: 0;
+    background-color: rgba(35, 193, 67, 0.7);
+}
+
+.shipyard-bin .shipyard-item > .sy-title span > i {
+    font-size: 1rem;
+    color: #000;
+}
+
+.shipyard-bin .shipyard-item > .sy-title span > i::before {
+    vertical-align: middle;
+}
+
 .shipyard-bin .shipyard-item:hover {
     background-size: 105%;
 }
 
 #shipyard > .window.dark {
-    background: rgba(25, 35, 45, .9);
+    /* background: rgba(25, 35, 45, .9); */
+    background: linear-gradient(0deg, var(--ui), #0c1b2b)!important;
     border-radius: 10px !important;
     width: 360px !important;
+    color: #75879f!important;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 
 #shipyard > .window.dark > section {
+    position: relative;
     padding: 5px;
     border-radius: 10px;
     border: none;
-    background-color: rgba(32, 45, 58, 0.5) !important;
     user-select: none;
+}
+
+#shipyard > .window.dark > section:not(:first-of-type)::before {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    content: "";
+    height: 1px;
+    background: hsla(0,0%,100%,5%);
+}
+
+#shipyard > .window.dark > section > h3 {
+    position: relative;
+    color: white;
+    font-weight: 600;
 }
 
 #shipyard > .window.dark > button {
@@ -720,9 +819,11 @@ body:not(:has(#rejoin_button.dnone)) #chat.closed #chat-content p[data-miss] {
 }
 
 #shipyard input {
+    border: 1px solid hsla(0, 0%, 100%, 15%);
     border-radius: 10px;
     text-align: center;
     padding: 5px;
+    font-size: 1em;
 }
 
 .tip {
