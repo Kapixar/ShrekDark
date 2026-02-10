@@ -286,3 +286,6 @@ Chat:
 - option to disable/ set garavity hotkeys
 - hotkey to swithcuing ammo mode
 - be able to use one webhook more than once
+
+- diferent direction of aniamtion menu
+- server menu inactive color

@@ -1,3 +1,22 @@
+:root {
+    --primary: #d5de2e;
+    --secondary: #556f44;
+    --background: #19232d;
+    --text: #eef0f2;
+    --error: #a4243b;
+
+    --blue-488: #488;
+    --red-a44: #a44;
+    --green-4a4: #4a4;
+    --orange-b84: #b84;
+    --grey-666: #666;
+    --blue-1353a5: #1353a5;
+    --purple-a4a: #a4a;
+    --yellow-994: #994;
+    --orange-e36905: #e36905;
+    --scrollTrack: #0000004d;
+    --scrollThumb: #b7b7b7;
+}
 
 ::-webkit-scrollbar {
     width: 13px;
@@ -13,7 +32,7 @@
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background: linear-gradient(var(--scrollThumb), #000 250%);
+    background: linear-gradient(var(--scrollThumb), var(--background) 250%);
     border-radius: 5px;
 }
 
@@ -29,15 +48,13 @@ body {
     align-items: center;
     justify-content: center;
 
-    background: #7a7b7b;
-    color: white;
+    background: var(--background);
+    color: var(--text);
     width: 600px;
     padding: 10px;
-    --scrollTrack: #0000004d;
-    --scrollThumb: rgb(123, 123, 123);
 }
 
-body>div:first-of-type {
+body > div:first-of-type {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -45,49 +62,56 @@ body>div:first-of-type {
     width: 100%;
 }
 
-body > div{
-    background-color: rgba(25,35,45,.9);
+body > div {
+    background-color: var(--background);
     border-radius: 10px;
     padding: 10px;
 }
 
 .big {
-    display: inline-block;;
-    background: linear-gradient(#488,#000 200%)!important;
-    border: 1px solid black;
+    display: inline-block;
+    background: linear-gradient(
+        var(--blue-488),
+        var(--background) 200%
+    ) !important;
+    border: 1px solid var(--background);
     border-radius: 5px;
     padding: 15px;
     font-size: large;
-    color: white;
+    color: var(--text);
     text-decoration: none;
 }
 
 .big.active {
-    background: linear-gradient(rgb(70, 136, 68),#000 200%)!important;
+    background: linear-gradient(
+        var(--green-4a4),
+        var(--background) 200%
+    ) !important;
 }
 
 .btn {
-    display: inline-block;;
-    background: linear-gradient(#488,#000 200%)!important;
-    border: 1px solid black;
+    display: inline-block;
+    background: linear-gradient(
+        var(--blue-488),
+        var(--background) 200%
+    ) !important;
+    border: 1px solid var(--background);
     border-radius: 5px;
     padding: 5px;
     margin: 5px;
-    color: white;
+    color: var(--text);
     text-decoration: none;
     cursor: pointer;
 }
 
-
 .warning {
-    color: red;
+    color: var(--error);
     font-weight: 600;
 }
 
 a {
-    color: green;
+    color: var(--green-4a4);
 }
-
 
 /* Tables settings */
 
@@ -97,52 +121,53 @@ table {
 }
 
 th {
-    background: white;
-    color: rgb(25, 35, 45);
+    background: var(--text);
+    color: var(--background);
 }
 
 td {
     text-align: center;
-    border: 1px solid white;
+    border: 1px solid var(--text);
     padding: 3px;
     overflow: auto;
     max-width: 200px;
 }
 
 td.red {
-    background: linear-gradient(#a44, #000 200%);
+    background: linear-gradient(var(--red-a44), var(--background) 200%);
     cursor: pointer;
     user-select: none;
 }
 
 td.orange {
-    background: linear-gradient(rgb(227, 105, 5), #000 200%);
-    cursor: pointer;
-    user-select: none; 
-}
-
-td:last-child.add {
-    background: rgb(3, 97, 8);
-    background: linear-gradient(#488, #000 200%);
+    background: linear-gradient(var(--orange-e36905), var(--background) 200%);
     cursor: pointer;
     user-select: none;
 }
 
-table input, table textarea {
+td:last-child.add {
+    background: var(--green-4a4);
+    background: linear-gradient(var(--blue-488), var(--background) 200%);
+    cursor: pointer;
+    user-select: none;
+}
+
+table input,
+table textarea {
     border: none;
     text-align: center;
-    color: white;
+    color: var(--text);
     background: none;
     width: 96%;
 }
 
 /* Button manager table */
 
-#buttons-table tbody{
-    border-bottom: rgb(255, 255, 255) 10px solid;
+#buttons-table tbody {
+    border-bottom: var(--text) 10px solid;
 }
 
-#buttons-table td:nth-of-type(3){
+#buttons-table td:nth-of-type(3) {
     display: flex;
     justify-content: space-around;
 }
@@ -153,22 +178,24 @@ table input, table textarea {
 }
 
 #buttons-table td:nth-of-type(3) span:hover {
-    color: rgb(224, 26, 26);
+    color: var(--error);
 }
 
 #buttons-table select {
-    color: white;
+    color: var(--text);
 }
 
-#buttons-table select, #buttons-table option {
-    background: linear-gradient(var(--btnColor),#000 200%); background-color: var(--btnColor);
+#buttons-table select,
+#buttons-table option {
+    background: linear-gradient(var(--btnColor), var(--background) 200%);
+    background-color: var(--btnColor);
 }
 
-#buttons-table input[type='text'] {
+#buttons-table input[type="text"] {
     width: 70px;
 }
 
-#buttons-table input[type='checkbox'] {
+#buttons-table input[type="checkbox"] {
     width: 20px;
 }
 
@@ -176,48 +203,70 @@ table input, table textarea {
     width: 60px;
 }
 
-.btn-yellow { --btnColor: #994; }
-.btn-blue { --btnColor: #488; }
-.btn-red { --btnColor: #a44; }
-.btn-green { --btnColor: #4a4; }
-.btn-orange { --btnColor: #b84; }
-.btn-white { --btnColor: #fff; color: black;}
-.btn-black { --btnColor: #000; }
-.btn-grey { --btnColor: #666; }
-.btn-darkBlue { --btnColor: #1353a5; }
-.btn-purple { --btnColor: #a4a; }
+.btn-yellow {
+    --btnColor: var(--yellow-994);
+}
+.btn-blue {
+    --btnColor: var(--blue-488);
+}
+.btn-red {
+    --btnColor: var(--red-a44);
+}
+.btn-green {
+    --btnColor: var(--green-4a4);
+}
+.btn-orange {
+    --btnColor: var(--orange-b84);
+}
+.btn-white {
+    --btnColor: var(--text);
+    color: var(--background);
+}
+.btn-black {
+    --btnColor: var(--background);
+}
+.btn-grey {
+    --btnColor: var(--grey-666);
+}
+.btn-darkBlue {
+    --btnColor: var(--blue-1353a5);
+}
+.btn-purple {
+    --btnColor: var(--purple-a4a);
+}
 
 /* various */
 
-#txt-input{
+#txt-input {
     display: none;
 }
 
-#txt-input + label{
-    background: linear-gradient(rgb(110, 133, 24), #000 200%);
+#txt-input + label {
+    background: linear-gradient(var(--primary), var(--background) 200%);
     border-radius: 10px;
     padding: 10px;
     cursor: pointer;
 }
 
-#txt-remove{
-    background: linear-gradient(rgb(140, 20, 20), #000 200%);
+#txt-remove {
+    background: linear-gradient(var(--error), var(--background) 200%);
     border-radius: 10px;
     padding: 10px;
-    color: white;
+    color: var(--text);
     cursor: pointer;
 }
 
-input[type='range'] {
-    accent-color: rgb(16, 196, 22);
+input[type="range"] {
+    accent-color: var(--green-4a4);
     width: 70%;
 }
 
-#translateBox input[type="text"], #chatmaxheight {
+#translateBox input[type="text"],
+#chatmaxheight {
     background-color: transparent;
-    border: 1px solid white;
+    border: 1px solid var(--text);
     border-radius: 10px;
-    color: white;
+    color: var(--text);
     text-align: center;
     padding: 5px;
 }
@@ -238,7 +287,7 @@ input[type='range'] {
     list-style: none;
     position: relative;
     min-width: 50vw;
-    transition: all .6s ease-out;
+    transition: all 0.6s ease-out;
 }
 
 #messageContainer li.show {
@@ -251,7 +300,7 @@ input[type='range'] {
 
 #messageContainer p {
     /* background-color: rgba(33, 143, 18, 0.8); */
-    background-color: rgb(0, 159, 107, 0.8);
+    background-color: color-mix(in srgb, var(--green-4a4) 80%, transparent);
     /* background-color: rgba(196, 2, 51, 0.8); */
     opacity: 0;
     border-radius: 10px;
@@ -263,7 +312,7 @@ input[type='range'] {
     left: 0;
     bottom: 0;
     transform: translateY(200px);
-    transition: all .6s ease-out;
+    transition: all 0.6s ease-out;
 }
 
 #messageContainer p.show {
@@ -272,10 +321,9 @@ input[type='range'] {
 }
 
 #messageContainer p.error {
-    background-color: rgba(143, 18, 18, 0.8);
+    background-color: color-mix(in srgb, var(--error) 80%, transparent);
     /* background-color: rgba(255, 0, 0, 0.8); */
 }
-
 
 @keyframes errorSlideIn {
     from {
