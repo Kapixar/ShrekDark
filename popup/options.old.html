@@ -4,125 +4,19 @@
 <head>
     <link rel="stylesheet" href="popup.css">
     <title>ShrekDark</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0" />
+    <meta charset='UTF-8' />
 </head>
 
 <body>
-    <nav>
-        <img src="../img/icon.svg" alt="Extension icon">
-        <h1 class="mainName">
-            <span>Shrek</span>
-            <span>Dark</span>
-        </h1>
-    </nav>
+    <ul id="messageContainer"></ul>
+    <div>
+        <img src="../img/icon100.png" alt="Extension icon">
+        <h1>ShrekDark 3.8</h1>
+        <a class="big" href="popup.html">About</a>
+        <a class="big active" href="options.html">Settings</a>
+    </div>
 
-    <main>
-        <h2>About</h2>
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Accusamus perferendis, quidem dolor assumenda
-            natus animi quia repellendus temporibus omnis fugit earum a at voluptatibus quod officia. Voluptatum
-            repellendus esse facere.
-        </p>
-        <h2>Features</h2>
-
-        <div class="features-grid">
-            <div>
-                <span class="material-symbols-outlined">language</span>
-                <span>Built-in Translator</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">join</span>
-                <span>Interactive Invites</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">manage_accounts</span>
-                <span>Player Management</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">quick_phrases</span>
-                <span>Quick Phrases</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">call_missed</span>
-                <span>Missed Messages Alert</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">expand</span>
-                <span>Expandable Chat</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">animation</span>
-                <span>Smooth Animations</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">view_list</span>
-                <span>Player List (TAB)</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">refresh</span>
-                <span>Rejoin & Quick Actions</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">tune</span>
-                <span>Customizable Buttons</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">dashboard</span>
-                <span>Modern Game Menu</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">palette</span>
-                <span>Custom UI Colors</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">height</span>
-                <span>Custom Scrollbars</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">keyboard</span>
-                <span>Hotkeys Support</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">videocam</span>
-                <span>Cinematic Mode</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">favorite</span>
-                <span>Favorite Ships</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">helicopter</span>
-                <span>Snakecopter Mode</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">antigravity</span>
-                <span>Save Gravity Direction</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">wallpaper</span>
-                <span>Quick Texture Swap</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">sos</span>
-                <span>Discord Distress Ping</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">bar_chart</span>
-                <span>Crew Statistics</span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined">info</span>
-                <span>Enhanced Kick Screen</span>
-            </div>
-        </div>
-        <h2>Help & Community Chat</h2>
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Accusamus perferendis, quidem dolor assumenda
-            natus animi quia repellendus temporibus omnis fugit earum a at voluptatibus quod officia. Voluptatum
-            repellendus esse facere.
-        </p>
-
+    <div>
         <h2>Hotkeys</h2>
         <table id="key-table">
             <thead>
@@ -170,7 +64,8 @@
             <li>Enter nothing to disable.</li>
             <li>These hotkeys don't work in chat</li>
         </ul>
-
+    </div>
+    <div>
         <h2>Buttons Manager</h2>
         <p>Manage the game buttons</p>
         <table id="buttons-table">
@@ -186,12 +81,12 @@
         </table>
         <button id="btnsave" class="btn">Save</button>
         <button id="btnrestore" class="btn">Restore default</button>
-
+    </div>
+    <div id="translateBox">
         <h2>Chat translator</h2>
         <p>To translate someone's messages double click on it (non-system messages)</p>
         <p>To translate your messages in input box use Ctrl+Enter or click the Globe</p>
-        <p><a class="btn" target="_blank" href="https://cloud.google.com/translate/docs/languages">Language codes</a>
-        </p>
+        <p><a class="btn" target="_blank" href="https://cloud.google.com/translate/docs/languages">Language codes</a></p>
         <hr>
         <p>Choose language that you want phrases to be translated into</p>
         <label for="langIn-input">Translate chat to: </label><br>
@@ -201,7 +96,8 @@
         <p class="warning">Warning, enabling constant auto translation may cause lag</p>
         <label for="lang-auto">Auto translate chat</label>
         <input type="checkbox" id="lang-auto">
-
+    </div>
+    <div>
         <h2>Favourite ships</h2>
         <table id="fav-table">
             <thead>
@@ -213,7 +109,7 @@
                 </tr>
             </thead>
             <tbody></tbody>
-            <tfoot>
+            <tfoot>  
                 <tr>
                     <td><input placeholder="Text" id="favtext" type="text"></td>
                     <td><input placeholder="Ship ID" id="favid" type="text"></td>
@@ -223,7 +119,8 @@
             </tfoot>
         </table>
         <label><input type="checkbox" id="favcheck">Hide favourite ship from top bar</label>
-
+    </div>
+    <div>
         <h2>Favourite phrases</h2>
         <table id="word-table">
             <thead>
@@ -242,7 +139,8 @@
                 </tr>
             </tfoot>
         </table>
-
+    </div>
+    <div>
         <h2>Emergency distress ping</h2>
         <p>Quickly send emergency message to the discord webhook with ship name and ID</p>
         <p>If you are the captain on ship, it will also send invite</p>
@@ -269,7 +167,8 @@
                 </tr>
             </tfoot>
         </table>
-
+    </div>
+    <div>
         <h2>Gravity Save</h2>
         <p>Save gravity direction of your ship</p>
         <p>Applies on joining desired ship</p>
@@ -286,43 +185,46 @@
                 <tr>
                     <td><input placeholder="Ship ID" id="gravid" type="text"></td>
                     <td><select id="gravdir">
-                            <option value="0">up</option>
-                            <option value="1">left</option>
-                            <option value="2">right</option>
-                            <option value="3" selected>down</option>
-                        </select></td>
+                        <option value="0">up</option>
+                        <option value="1">left</option>
+                        <option value="2">right</option>
+                        <option value="3" selected>down</option>
+                    </select></td>
                     <td colspan="2" class="add">Add</td>
                 </tr>
             </tfoot>
         </table>
-
+    </div>
+    <div>
         <h2>TXT Swap</h2>
         <input type="file" id="txt-input" accept="application/x-zip-compressed">
         <label for="txt-input">Choose Texture pack</label>
         <button id="txt-remove">Remove</button>
         <p>Status: <span id="txt-current">default shrek's pack</span></p>
-
+    </div>
+    <div>
         <h2>Snakecopter</h2>
         <label>Duration: <input type="range" id="duration" min="5" max="600"></label>
         <p><span id="snakeoutput"></span> seconds. Updates in game in real time.</p>
-
+    </div>
+    <div>
         <h2>Scrollbar</h2>
         <label>Track: <input type="color" id="sctrack"></label>
         <label>Thumb: <input type="color" id="scthumb"></label>
         <label>Transparent: <input type="checkbox" id="sctrans"></label>
-
+    </div>
+    <div>
         <h2>UI Theme</h2>
         <label>Main color: <input type="color" id="uicolor"></label>
         <label>Opacity: <input type="range" id="uiopacity" min="0" max="1" step="0.1" value="0.9" width="40"></label>
         <button id="defaultUI" class="btn">Default</button>
-
+    </div>
+    <div>
         <h2>Chat Height</h2>
-        <label>Max Chat Height: <input type="number" id="chatmaxheight" min="100" max="999" maxlength="3"
-                placeholder="300"></label> px
+        <label>Max Chat Height: <input type="number" id="chatmaxheight" min="100" max="999" maxlength="3" placeholder="300"></label> px
         <button id="saveChatMaxHeight" class="btn">Save</button>
         <button id="defaultChatMaxHeight" class="btn">Default</button>
-    </main>
-
+    </div>
     <script src="options.js"></script>
 </body>
 
