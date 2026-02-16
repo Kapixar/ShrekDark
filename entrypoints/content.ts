@@ -1,7 +1,7 @@
 import './style.css';
 import { browser } from 'wxt/browser';
 import haloFontUrl from '~/assets/Halo.ttf';
-import { isCaptain, observeNode } from '../components/utility';
+import { isCaptain, observeNode, translate } from '../components/utility';
 import {
     chatSendBtn,
     chatContainer,
@@ -67,15 +67,23 @@ export default defineContentScript({
 
         // Load convertInvite unlisted script
         const convertInviteScript = document.createElement('script');
-        convertInviteScript.src = browser.runtime.getURL('/convertInvite.js');
+        convertInviteScript.src = browser.runtime.getURL('/chatInvites.js');
         convertInviteScript.type = 'module';
         (document.head || document.documentElement).appendChild(convertInviteScript);
+
+        // Load chatTranslation unlisted script
+        const chatTranslationScript = document.createElement('script');
+        chatTranslationScript.src = browser.runtime.getURL('/chatTranslations.js');
+        chatTranslationScript.type = 'module';
+        (document.head || document.documentElement).appendChild(chatTranslationScript);
+
+
         addRejoin();
         addChatPhrases();
-        addChatTrans();
+        // addChatTrans();
         addCustomButtons();
         const rejoin = document.getElementById("rejoin_button");
-        let chatTranslate = document.getElementById("opt_chat_translate");
+        // let chatTranslate = document.getElementById("opt_chat_translate");
         const langInput = document.getElementById("lang-input");
         let pingsBox = document.querySelector('#top-bar select:nth-of-type(2)')
 
@@ -378,39 +386,39 @@ export default defineContentScript({
         //     });
         // }
 
-        let lang = 'en';
-        function addChatTrans() {
-            const translateButton = document.createElement('i');
-            translateButton.classList.add('fas', 'fa-globe', 'btn-gray', 'btn');
+        // let lang = 'en';
+        // function addChatTrans() {
+        //     const translateButton = document.createElement('i');
+        //     translateButton.classList.add('fas', 'fa-globe', 'btn-gray', 'btn');
 
-            const langIn = document.createElement('input');
-            langIn.id = 'lang-input';
-            langIn.maxLength = 4;
-            langIn.placeholder = 'en';
-            chatContainer.append(langIn);
-            chatContainer.append(translateButton);
+        //     const langIn = document.createElement('input');
+        //     langIn.id = 'lang-input';
+        //     langIn.maxLength = 4;
+        //     langIn.placeholder = 'en';
+        //     chatContainer.append(langIn);
+        //     chatContainer.append(translateButton);
 
-            translateButton.onclick = async () => {
-                if (!chatInput.value || !langIn.value) return;
-                [chatInput.value, _] = await translate(chatInput.value, 'auto', langIn.value == "" ? 'en' : langIn.value);
-            }
+        //     translateButton.onclick = async () => {
+        //         if (!chatInput.value || !langIn.value) return;
+        //         [chatInput.value, _] = await translate(chatInput.value, 'auto', langIn.value == "" ? 'en' : langIn.value);
+        //     }
 
-            const autoTransLabel = document.createElement('label');
-            autoTransLabel.textContent = 'Auto Translate';
-            const autoTrans = document.createElement('input');
-            autoTrans.type = 'checkbox';
-            autoTrans.id = 'opt_chat_translate';
-            autoTrans.checked = false;
-            autoTransLabel.prepend(autoTrans);
-            document.querySelector('#chat > button + div').prepend(autoTransLabel);
+        //     const autoTransLabel = document.createElement('label');
+        //     autoTransLabel.textContent = 'Auto Translate';
+        //     const autoTrans = document.createElement('input');
+        //     autoTrans.type = 'checkbox';
+        //     autoTrans.id = 'opt_chat_translate';
+        //     autoTrans.checked = false;
+        //     autoTransLabel.prepend(autoTrans);
+        //     document.querySelector('#chat > button + div').prepend(autoTransLabel);
 
-            browser.storage.sync.get("transl", function (result) {
-                if (!result.transl) return;
-                lang = result.transl[0];
-                langIn.value = result.transl[1];
-                autoTrans.checked = result.transl[2];
-            });
-        }
+        //     browser.storage.sync.get("transl", function (result) {
+        //         if (!result.transl) return;
+        //         lang = result.transl[0];
+        //         langIn.value = result.transl[1];
+        //         autoTrans.checked = result.transl[2];
+        //     });
+        // }
 
         browser.storage.sync.get("colors", function (result) {
             let colors;
@@ -475,20 +483,20 @@ export default defineContentScript({
             }
             highlightAFK();
             addTimeStamp(mess);
-            if (chatTranslate.checked) translateChatMessage(mess);
-            else mess.addEventListener("dblclick", () => { translateChatMessage(mess) }, { once: true });
+            // if (chatTranslate.checked) translateChatMessage(mess);
+            // else mess.addEventListener("dblclick", () => { translateChatMessage(mess) }, { once: true });
             // convertInvite(mess);
             if (isCaptain()) addPlayer(mess);
             if (mess.textContent.includes('Do The Roar!') && !mess.textContent.includes(playerID)) sendFunnyChat('roar');
         }, true, { childList: true, attributes: false, subtree: false });
 
         //comms observer
-        observeNode(commsContent, () => {
-            const mess = document.querySelector("#comms-text > p:last-of-type");
-            if (!mess) return;
-            else mess.addEventListener("dblclick", () => { translateCommsMessage(mess) }, { once: true });
-            // convertCommsInvite(mess);
-        }, true, { childList: true, attributes: false, subtree: false });
+        // observeNode(commsContent, () => {
+        //     const mess = document.querySelector("#comms-text > p:last-of-type");
+        //     if (!mess) return;
+        //     else mess.addEventListener("dblclick", () => { translateCommsMessage(mess) }, { once: true });
+        //     // convertCommsInvite(mess);
+        // }, true, { childList: true, attributes: false, subtree: false });
 
 
         // async function convertInvite(mess: string) {
@@ -594,58 +602,58 @@ export default defineContentScript({
         //     return inviteD;
         // }
 
-        async function translateChatMessage(p: Element) {
-            const text = p.textContent;
-            if (text.indexOf(': ') == -1) return;
-            const t = text.slice(text.indexOf(': ') + 2);
-            if (!t) return;
-            try {
-                const [trans, origin] = await translate(t, 'auto', lang);
-                const messIcon = document.createElement('i');
-                messIcon.classList.add('fas', 'fa-globe');
-                const messBdi = p.querySelector('b');
-                const messTrans = document.createElement('span');
-                messTrans.setAttribute('data-trans', '');
-                messTrans.textContent = trans;
-                const messPre = document.createElement('pre');
-                messPre.textContent = `${origin}: ${t.replaceAll('"', "&quot;")}`;
-                messPre.onclick = () => { langInput.value = origin; }
-                p.replaceChildren();
-                p.append(messBdi, messIcon, messTrans, messPre);
-                if (isCaptain()) addPlayer(p);
-            } catch { return; }
-        }
+        // async function translateChatMessage(p: Element) {
+        //     const text = p.textContent;
+        //     if (text.indexOf(': ') == -1) return;
+        //     const t = text.slice(text.indexOf(': ') + 2);
+        //     if (!t) return;
+        //     try {
+        //         const [trans, origin] = await translate(t, 'auto', lang);
+        //         const messIcon = document.createElement('i');
+        //         messIcon.classList.add('fas', 'fa-globe');
+        //         const messBdi = p.querySelector('b');
+        //         const messTrans = document.createElement('span');
+        //         messTrans.setAttribute('data-trans', '');
+        //         messTrans.textContent = trans;
+        //         const messPre = document.createElement('pre');
+        //         messPre.textContent = `${origin}: ${t.replaceAll('"', "&quot;")}`;
+        //         messPre.onclick = () => { langInput.value = origin; }
+        //         p.replaceChildren();
+        //         p.append(messBdi, messIcon, messTrans, messPre);
+        //         if (isCaptain()) addPlayer(p);
+        //     } catch { return; }
+        // }
 
-        async function translateCommsMessage(p: Element) {
-            const text = p.textContent;
-            const t = text.slice(text.indexOf(': ') + 2);
-            if (!t) return;
-            try {
-                const [trans, origin] = await translate(t, 'auto', lang);
-                const messBdi = p.querySelector('bdi');
-                const messTrans = document.createElement('data');
-                messTrans.setAttribute('data-trans', '');
-                messTrans.textContent = `: ${trans}`;
-                const messPre = document.createElement('pre');
-                messPre.textContent = `${origin}: ${t.replaceAll('"', "&quot;")}`;
-                // messPre.onclick = () => { langInput.value = origin; }
-                p.replaceChildren();
-                p.append(messBdi, messTrans, messPre);
-            } catch { return; }
-        }
+        // async function translateCommsMessage(p: Element) {
+        //     const text = p.textContent;
+        //     const t = text.slice(text.indexOf(': ') + 2);
+        //     if (!t) return;
+        //     try {
+        //         const [trans, origin] = await translate(t, 'auto', lang);
+        //         const messBdi = p.querySelector('bdi');
+        //         const messTrans = document.createElement('data');
+        //         messTrans.setAttribute('data-trans', '');
+        //         messTrans.textContent = `: ${trans}`;
+        //         const messPre = document.createElement('pre');
+        //         messPre.textContent = `${origin}: ${t.replaceAll('"', "&quot;")}`;
+        //         // messPre.onclick = () => { langInput.value = origin; }
+        //         p.replaceChildren();
+        //         p.append(messBdi, messTrans, messPre);
+        //     } catch { return; }
+        // }
 
-        function translate(text: string, from = 'auto', to = 'en') {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURI(text)}`;
-            return new Promise((res, rej) => {
-                fetch(url)
-                    .then(res => res.json())
-                    .then(out => {
-                        if (!out[0] || out[2] == to) rej('erorred');
-                        res([out[0].map(subarray => subarray[0]).join('\n'), out[2]]);
-                    })
-                    .catch(err => rej(err));
-            });
-        }
+        // function translate(text: string, from = 'auto', to = 'en') {
+        //     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURI(text)}`;
+        //     return new Promise((res, rej) => {
+        //         fetch(url)
+        //             .then(res => res.json())
+        //             .then(out => {
+        //                 if (!out[0] || out[2] == to) rej('erorred');
+        //                 res([out[0].map(subarray => subarray[0]).join('\n'), out[2]]);
+        //             })
+        //             .catch(err => rej(err));
+        //     });
+        // }
 
         function highlightAFK() {
             if (document.visibilityState === 'hidden') {

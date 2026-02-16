@@ -41,6 +41,7 @@ export default defineUnlistedScript(() => {
         return inviteD;
     }
 
+    // Chat messages
     async function convertInvite(mess: Element) {
         const messageText = mess.textContent;
         if (!messageText) return;
@@ -96,13 +97,13 @@ export default defineUnlistedScript(() => {
         }
     }
 
-    // Chat message observer
     observeNode(chatContent, () => {
         const mess = document.querySelector("#chat-content > p:last-of-type");
         if (!mess) return;
         convertInvite(mess);
     }, true, { childList: true, attributes: false, subtree: false });
 
+    // Comms messages
     async function convertCommsInvite(mess: Element) {
         const messageText = mess.textContent;
         if (!messageText) return;
@@ -158,7 +159,6 @@ export default defineUnlistedScript(() => {
         }
     }
 
-    // Comms message observer
     observeNode(commsContent, () => {
         const mess = document.querySelector("#comms-text > p:last-of-type");
         if (!mess) return;
