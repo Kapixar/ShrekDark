@@ -19,7 +19,7 @@
 }
 
 ::-webkit-scrollbar {
-    width: 13px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,31 +32,31 @@
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background: linear-gradient(var(--scrollThumb), var(--background) 250%);
+    background: var(--secondary);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollThumb);
+    background: var(--primary);
 }
 
 body {
-    display: flex;
-    gap: 2em;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
     background: var(--background);
     color: var(--text);
     width: 420px;
-    padding: 2em;
-    padding-top: 12em;
-    margin: auto;
+    height: 600px;
+    margin: 0;
+    padding: 0;
 
     font-family: "Noto Sans", sans-serif;
     font-size: 14px;
-    min-height: 100vh;
+}
+
+#app {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 nav {
@@ -68,9 +68,10 @@ nav {
     justify-content: center;
     align-items: center;
     margin: auto;
-    padding: 1em 2em;
+    padding: 1em 2rem;
+    height: 8rem;
     background: transparent;
-    z-index: 1000;
+    z-index: 1001;
 
     font-size: 1.5em;
     color: var(--primary);
@@ -96,9 +97,10 @@ nav {
 }
 
 nav.scrolled {
-    padding: 0.5em 2em;
+    padding: 0.5rem 2rem;
     border-color: var(--secondary);
     background-color: var(--background);
+    height: 4rem;
 
     img {
         width: 3em;
@@ -109,7 +111,8 @@ nav.scrolled {
         font-size: 1.5em;
     }
 
-    img, span {
+    img,
+    span {
         translate: -6rem;
     }
 
@@ -119,7 +122,16 @@ nav.scrolled {
 }
 
 main {
-    max-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-inline: 1rem;
+    padding-top: 9rem;
+    padding-bottom: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .mainName {
@@ -139,61 +151,6 @@ h2 {
 main p {
     color: var(--text);
     padding-left: 0.5em;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5em;
-}
-
-.features-grid>div {
-    position: relative;
-    overflow: hidden;
-    --border-radius: .5em;
-
-    border-radius: var(--border-radius);
-
-    height: 1.2em;
-    padding: 1.2em;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    background-color: white;
-
-
-    cursor: pointer;
-    user-select: none;
-
-    color: var(--primary);
-
-    border: 0.1em solid color-mix(in srgb, var(--secondary) 50%, var(--background) 50%);
-    border-radius: calc(var(--border-radius));
-    background-color: var(--background);
-
-    transition: all 0.2s ease-in-out;
-
-    span:first-of-type {
-        position: absolute;
-        top: -0.1em;
-        left: -0.1em;
-        rotate: 20deg;
-        font-size: 4em;
-        opacity: 0.5;
-        color: var(--secondary);
-        z-index: 0;
-    }
-
-    span:last-of-type {
-        z-index: 1;
-    }
-
-    &:hover {
-        border-color: var(--primary);
-        background-color: color-mix(in srgb, var(--primary) 10%, var(--background) 90%);
-    }
 }
 
 /* Tables */

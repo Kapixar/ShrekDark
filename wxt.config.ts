@@ -15,7 +15,7 @@ export default defineConfig({
         host_permissions: ["https://drednot.io/"],
         web_accessible_resources: [
             {
-                resources: ["shrekPack.zip", "https://api.npoint.io/*", "/huge_signs/mosaic.png", "Halo.ttf", "Sen-Regular.ttf"],
+                resources: ["shrekPack.zip", "https://api.npoint.io/*", "/huge_signs/mosaic.png", "Halo.ttf", "Sen-Regular.ttf", "convertInvite.js"],
                 matches: ["https://*.drednot.io/*"]
             }
         ]

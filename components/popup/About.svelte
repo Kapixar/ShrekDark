@@ -4,8 +4,5 @@
 
 <h2>About</h2>
 <p>
-    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Accusamus
-    perferendis, quidem dolor assumenda natus animi quia repellendus
-    temporibus omnis fugit earum a at voluptatibus quod officia. Voluptatum
-    repellendus esse facere.
+    Shrek's custom extension. Everything that should already be in the game... and more
 </p>
