@@ -1,7 +1,12 @@
-import './style.css';
-import { browser } from 'wxt/browser';
-import haloFontUrl from '~/assets/Halo.ttf';
-import { isCaptain, observeNode, translate } from '../components/utility';
+import "./style.css";
+import { browser } from "wxt/browser";
+import haloFontUrl from "~/assets/Halo.ttf";
+import {
+    isCaptain,
+    observeNode,
+    translate,
+    sendChat,
+} from "../components/utilities/utility";
 import {
     chatSendBtn,
     chatContainer,
@@ -15,20 +20,20 @@ import {
     teamMenu,
     disconnectPopup,
     buttonContainer,
-    topBar
-} from '../components/utility';
+    topBar,
+} from "../components/utilities/selectors";
+
+import { currentShipID } from "@/components/utilities/state";
 
 export default defineContentScript({
-    matches: ['https://*.drednot.io/*'],
+    matches: ["https://*.drednot.io/*"],
     main() {
-
         const font = new FontFace("Halo", `url(${haloFontUrl})`);
         document.fonts.add(font);
 
         var Fmanager = false;
         var manager = true;
-        var cShip = '';
-        const canvas = document.getElementById('canvas-game');
+        const canvas = document.getElementById("canvas-game");
         if (!canvas) throw new Error("Script doesn't work on these pages.");
         // const bigUiContainer = document.querySelector('#big-ui-container');
         // const exitBtn = document.getElementById("exit_button");
@@ -45,11 +50,11 @@ export default defineContentScript({
         // const topBar = document.querySelector('#top-bar');
         let shipYard = document.getElementById("shipyard-ships");
         // const config = { childList: true, attributes: true, subtree: true };
-        let playerID = '';
+        let playerID = "";
         const keyToggleState = {
             "'": false,
-            "/": false
-        }
+            "/": false,
+        };
 
         // function observeNode(node: Element | null, func: () => void, loop = false, conf = config) {
         //     if (!node) return;
@@ -65,18 +70,23 @@ export default defineContentScript({
         addCopyInvite();
         addInstantSave();
 
-        // Load convertInvite unlisted script
-        const convertInviteScript = document.createElement('script');
-        convertInviteScript.src = browser.runtime.getURL('/chatInvites.js');
-        convertInviteScript.type = 'module';
-        (document.head || document.documentElement).appendChild(convertInviteScript);
+        // Load convertInvite module
+        const convertInviteScript = document.createElement("script");
+        convertInviteScript.src = browser.runtime.getURL("/chatInvites.js");
+        convertInviteScript.type = "module";
+        (document.head || document.documentElement).appendChild(
+            convertInviteScript,
+        );
 
-        // Load chatTranslation unlisted script
-        const chatTranslationScript = document.createElement('script');
-        chatTranslationScript.src = browser.runtime.getURL('/chatTranslations.js');
-        chatTranslationScript.type = 'module';
-        (document.head || document.documentElement).appendChild(chatTranslationScript);
-
+        // Load chatTranslation module
+        const chatTranslationScript = document.createElement("script");
+        chatTranslationScript.src = browser.runtime.getURL(
+            "/chatTranslations.js",
+        );
+        chatTranslationScript.type = "module";
+        (document.head || document.documentElement).appendChild(
+            chatTranslationScript,
+        );
 
         addRejoin();
         addChatPhrases();
@@ -85,7 +95,7 @@ export default defineContentScript({
         const rejoin = document.getElementById("rejoin_button");
         // let chatTranslate = document.getElementById("opt_chat_translate");
         const langInput = document.getElementById("lang-input");
-        let pingsBox = document.querySelector('#top-bar select:nth-of-type(2)')
+        let pingsBox = document.querySelector("#top-bar select:nth-of-type(2)");
 
         const welcomeMessages = [
             "Welcome aboard Captain. All systems online. ",
@@ -112,27 +122,44 @@ export default defineContentScript({
             // addEmergCall();
             shipYard = document.getElementById("shipyard-ships");
 
-            // account    
-            playerID = document.querySelector('#shipyard code.user').textContent;
-            const welcomeMsg = document.createElement('h3');
-            welcomeMsg.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-            const playerIDspan = document.createElement('code');
-            playerIDspan.classList.add('user');
+            // account
+            playerID = document.querySelector(
+                "#shipyard code.user",
+            ).textContent;
+            const welcomeMsg = document.createElement("h3");
+            welcomeMsg.textContent =
+                welcomeMessages[
+                    Math.floor(Math.random() * welcomeMessages.length)
+                ];
+            const playerIDspan = document.createElement("code");
+            playerIDspan.classList.add("user");
             playerIDspan.textContent = playerID;
-            const playerBackgroundColor = document.querySelector('#shipyard code.user').style.background;
+            const playerBackgroundColor = document.querySelector(
+                "#shipyard code.user",
+            ).style.background;
             const gradientStyle = `linear-gradient(${playerBackgroundColor}, transparent 200%)`;
-            playerIDspan.style = document.querySelector('#shipyard code.user').style.cssText + `; background: ${gradientStyle};`;
+            playerIDspan.style =
+                document.querySelector("#shipyard code.user").style.cssText +
+                `; background: ${gradientStyle};`;
             welcomeMsg.append(playerIDspan);
 
             // removing original account info
-            document.querySelector('#shipyard section:nth-of-type(2) h3').classList.add('dnone');
-            document.querySelector('#shipyard section:nth-of-type(2) p').classList.add('dnone');
+            document
+                .querySelector("#shipyard section:nth-of-type(2) h3")
+                .classList.add("dnone");
+            document
+                .querySelector("#shipyard section:nth-of-type(2) p")
+                .classList.add("dnone");
 
             // adding new account info
-            document.querySelector('#shipyard section:nth-of-type(2)').prepend(welcomeMsg);
+            document
+                .querySelector("#shipyard section:nth-of-type(2)")
+                .prepend(welcomeMsg);
 
             // ship list
-            const nameInput = document.querySelector('#shipyard section:nth-of-type(3) p input');
+            const nameInput = document.querySelector(
+                "#shipyard section:nth-of-type(3) p input",
+            );
             nameInput.setAttribute("placeholder", "Search By Name");
             nameInput.focus();
         });
@@ -145,83 +172,153 @@ export default defineContentScript({
         //     } else bigUiContainer.classList.remove('dnone')
         // }, true, {childList: false, attributes: true, attributeFilter: ['style']});
 
-        observeNode(exitBtn, () => {
-            if (exitBtn.style.display != 'none') {
-                if (pingsBox) pingsBox.classList.remove('dnone');
-                rejoin.classList.remove('dnone');
-            } else {
-                if (pingsBox) pingsBox.classList.add('dnone');
-                rejoin.classList.add('dnone');
-                document.querySelector('#copy_invite').classList.add('dnone');
-                document.querySelector('#instant_save').classList.add('dnone');
-                copterState = false;
-                showPlayerListCooldown = false;
-                if (playerID != '') {
-                    const mess = document.createElement('p');
-                    const messB = document.createElement('b');
-                    messB.textContent = `${playerID} (You) left the ship`;
-                    mess.append(messB);
-                    chatContent.append(mess);
+        observeNode(
+            exitBtn,
+            () => {
+                if (exitBtn.style.display != "none") {
+                    if (pingsBox) pingsBox.classList.remove("dnone");
+                    rejoin.classList.remove("dnone");
+                } else {
+                    if (pingsBox) pingsBox.classList.add("dnone");
+                    rejoin.classList.add("dnone");
+                    document
+                        .querySelector("#copy_invite")
+                        .classList.add("dnone");
+                    document
+                        .querySelector("#instant_save")
+                        .classList.add("dnone");
+                    copterState = false;
+                    showPlayerListCooldown = false;
+                    if (playerID != "") {
+                        const mess = document.createElement("p");
+                        const messB = document.createElement("b");
+                        messB.textContent = `${playerID} (You) left the ship`;
+                        mess.append(messB);
+                        chatContent.append(mess);
+                    }
                 }
-            }
-        }, true);
-        observeNode(manageBtn, () => {
-            if (manageBtn.style.display == 'none') return;
-            document.querySelector('#instant_save').classList.remove('dnone');
-            document.querySelector('#copy_invite').classList.remove('dnone');
-        }, true);
+            },
+            true,
+        );
+        observeNode(
+            manageBtn,
+            () => {
+                if (manageBtn.style.display == "none") return;
+                document
+                    .querySelector("#instant_save")
+                    .classList.remove("dnone");
+                document
+                    .querySelector("#copy_invite")
+                    .classList.remove("dnone");
+            },
+            true,
+        );
 
         browser.storage.sync.get("key", function (result) {
             let arr = result.key;
-            if (arr == null || arr.length != 6) arr = [1, "q", "r", "", "", "", 1];
+            if (arr == null || arr.length != 6)
+                arr = [1, "q", "r", "", "", "", 1];
             if (arr[0]) {
-                document.addEventListener('keydown', async (event) => {
-                    if (!document.title.includes("- Deep")) {
-                        if (disconnectPopup?.style.display === '' && event.key === 'Escape') Array.from(document.getElementsByTagName("button")).filter(btn => btn.innerText === "Return to Menu")[0].click();
-                        return
-                    }
-                    if (document.activeElement != document.body) {
-                        if (event.ctrlKey && event.key === "Enter") {
-                            if (!langInput.value) return;
-                            if (document.activeElement == chatInput) [chatInput.value, _] = await translate(chatInput.value, 'auto', langInput.value);
-                            if (document.activeElement == commsInput) [commsInput.value, _] = await translate(commsInput.value, 'auto', langInput.value);
+                document.addEventListener(
+                    "keydown",
+                    async (event) => {
+                        if (!document.title.includes("- Deep")) {
+                            if (
+                                disconnectPopup?.style.display === "" &&
+                                event.key === "Escape"
+                            )
+                                Array.from(
+                                    document.getElementsByTagName("button"),
+                                )
+                                    .filter(
+                                        (btn) =>
+                                            btn.innerText === "Return to Menu",
+                                    )[0]
+                                    .click();
+                            return;
                         }
-                        return;
-                    };
-                    const key = event.key.toUpperCase();
-                    if (!event.shiftKey && key === 'TAB') showPlayerList();
-                    if (event.shiftKey) handleKeyPress(event, arr, key);
-                }, false);
+                        if (document.activeElement != document.body) {
+                            if (event.ctrlKey && event.key === "Enter") {
+                                if (!langInput.value) return;
+                                if (document.activeElement == chatInput)
+                                    [chatInput.value, _] = await translate(
+                                        chatInput.value,
+                                        "auto",
+                                        langInput.value,
+                                    );
+                                if (document.activeElement == commsInput)
+                                    [commsInput.value, _] = await translate(
+                                        commsInput.value,
+                                        "auto",
+                                        langInput.value,
+                                    );
+                            }
+                            return;
+                        }
+                        const key = event.key.toUpperCase();
+                        if (!event.shiftKey && key === "TAB") showPlayerList();
+                        if (event.shiftKey) handleKeyPress(event, arr, key);
+                    },
+                    false,
+                );
             } else {
-                document.addEventListener('keydown', async (event) => {
-                    if (!document.title.includes("- Deep")) {
-                        if (disconnectPopup?.style.display === '' && event.key === 'Escape') Array.from(document.getElementsByTagName("button")).filter(btn => btn.innerText === "Return to Menu")[0].click();
-                        return
-                    }
-                    if (document.activeElement != document.body) {
-                        if (event.ctrlKey && event.key === "Enter") {
-                            if (!langInput.value) return;
-                            if (document.activeElement == chatInput) [chatInput.value, _] = await translate(chatInput.value, 'auto', langInput.value);
-                            if (document.activeElement == commsInput) [commsInput.value, _] = await translate(commsInput.value, 'auto', langInput.value);
+                document.addEventListener(
+                    "keydown",
+                    async (event) => {
+                        if (!document.title.includes("- Deep")) {
+                            if (
+                                disconnectPopup?.style.display === "" &&
+                                event.key === "Escape"
+                            )
+                                Array.from(
+                                    document.getElementsByTagName("button"),
+                                )
+                                    .filter(
+                                        (btn) =>
+                                            btn.innerText === "Return to Menu",
+                                    )[0]
+                                    .click();
+                            return;
                         }
-                        return;
-                    };
-                    const key = event.key.toUpperCase();
-                    if (!event.ctrlKey && key === 'TAB') showPlayerList();
-                    if (event.ctrlKey) handleKeyPress(event, arr, key);
-                }, false);
+                        if (document.activeElement != document.body) {
+                            if (event.ctrlKey && event.key === "Enter") {
+                                if (!langInput.value) return;
+                                if (document.activeElement == chatInput)
+                                    [chatInput.value, _] = await translate(
+                                        chatInput.value,
+                                        "auto",
+                                        langInput.value,
+                                    );
+                                if (document.activeElement == commsInput)
+                                    [commsInput.value, _] = await translate(
+                                        commsInput.value,
+                                        "auto",
+                                        langInput.value,
+                                    );
+                            }
+                            return;
+                        }
+                        const key = event.key.toUpperCase();
+                        if (!event.ctrlKey && key === "TAB") showPlayerList();
+                        if (event.ctrlKey) handleKeyPress(event, arr, key);
+                    },
+                    false,
+                );
             }
-            document.addEventListener('keyup', async (event) => {
-                if (!document.title.includes("- Deep") || document.activeElement != document.body) return;
+            document.addEventListener("keyup", async (event) => {
+                if (
+                    !document.title.includes("- Deep") ||
+                    document.activeElement != document.body
+                )
+                    return;
                 if (event.key === `'`) {
                     keyToggleState["'"] = !keyToggleState["'"];
                     if (keyToggleState["'"]) event.stopPropagation();
-                }
-                else if (event.key === `/`) {
+                } else if (event.key === `/`) {
                     keyToggleState["/"] = !keyToggleState["/"];
                     if (keyToggleState["/"]) event.stopPropagation();
                 }
-            })
+            });
         });
 
         function handleKeyPress(ev, arr, key) {
@@ -230,48 +327,118 @@ export default defineContentScript({
             else if (key === arr[5].toUpperCase()) switchTXT();
 
             if (!isCaptain()) return;
-            if (key === 'ARROWDOWN') changeGravity(3);
-            else if (key === 'ARROWUP') changeGravity(0);
-            else if (key === 'ARROWLEFT') changeGravity(1);
-            else if (key === 'ARROWRIGHT') changeGravity(2);
-            else if (key === 'TAB') {
+            if (key === "ARROWDOWN") changeGravity(3);
+            else if (key === "ARROWUP") changeGravity(0);
+            else if (key === "ARROWLEFT") changeGravity(1);
+            else if (key === "ARROWRIGHT") changeGravity(2);
+            else if (key === "TAB") {
                 ev.preventDefault();
                 manageBtn.click();
-            }
-            else if (key === arr[3].toUpperCase()) zeroGravity();
+            } else if (key === arr[3].toUpperCase()) zeroGravity();
             else if (key === arr[4].toUpperCase()) saveShip();
         }
 
         var gravityShips = {};
         browser.storage.sync.get("gravity", function (result) {
             if (!result.gravity) return;
-            for (const entry of result.gravity) gravityShips[`{${entry[0].toUpperCase()}}`] = parseInt(entry[1]);
+            for (const entry of result.gravity)
+                gravityShips[`{${entry[0].toUpperCase()}}`] = parseInt(
+                    entry[1],
+                );
         });
 
         var params = new URLSearchParams(location.search);
-        if (params.get('ship') != null) {
-            params = (params.get('ship')).toUpperCase();
+        if (params.get("ship") != null) {
+            params = params.get("ship").toUpperCase();
             observeNode(document.querySelector("#big-ui-container"), () => {
-                document.querySelector('.window section:nth-of-type(3) p button').click()
+                document
+                    .querySelector(".window section:nth-of-type(3) p button")
+                    .click();
                 observeNode(shipYard, () => {
-                    if (document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-                        document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+                    if (
+                        document.evaluate(
+                            `//*[text()="{${params}}"]`,
+                            shipYard,
+                            null,
+                            XPathResult.FIRST_ORDERED_NODE_TYPE,
+                            null,
+                        ).singleNodeValue
+                    ) {
+                        document
+                            .evaluate(
+                                `//*[text()="{${params}}"]`,
+                                shipYard,
+                                null,
+                                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                null,
+                            )
+                            .singleNodeValue.click();
                     } else {
                         changeServer(0);
                         observeNode(shipYard, () => {
-                            if (document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-                                document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+                            if (
+                                document.evaluate(
+                                    `//*[text()="{${params}}"]`,
+                                    shipYard,
+                                    null,
+                                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                    null,
+                                ).singleNodeValue
+                            ) {
+                                document
+                                    .evaluate(
+                                        `//*[text()="{${params}}"]`,
+                                        shipYard,
+                                        null,
+                                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                        null,
+                                    )
+                                    .singleNodeValue.click();
                             } else {
                                 changeServer(1);
                                 observeNode(shipYard, () => {
-                                    if (document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-                                        document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+                                    if (
+                                        document.evaluate(
+                                            `//*[text()="{${params}}"]`,
+                                            shipYard,
+                                            null,
+                                            XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                            null,
+                                        ).singleNodeValue
+                                    ) {
+                                        document
+                                            .evaluate(
+                                                `//*[text()="{${params}}"]`,
+                                                shipYard,
+                                                null,
+                                                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                                null,
+                                            )
+                                            .singleNodeValue.click();
                                     } else {
                                         changeServer(2);
-                                        if (document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-                                            document.evaluate(`//*[text()="{${params}}"]`, shipYard, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+                                        if (
+                                            document.evaluate(
+                                                `//*[text()="{${params}}"]`,
+                                                shipYard,
+                                                null,
+                                                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                                null,
+                                            ).singleNodeValue
+                                        ) {
+                                            document
+                                                .evaluate(
+                                                    `//*[text()="{${params}}"]`,
+                                                    shipYard,
+                                                    null,
+                                                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                                                    null,
+                                                )
+                                                .singleNodeValue.click();
                                         } else {
-                                            alert("There is no ship with ID you provided, check your spelling!")
+                                            alert(
+                                                "There is no ship with ID you provided, check your spelling!",
+                                            );
                                         }
                                     }
                                 });
@@ -285,23 +452,41 @@ export default defineContentScript({
         function addCustomButtons() {
             browser.storage.sync.get("buttons", function (result) {
                 if (result.buttons == undefined) return;
-                const colors = ['red', 'green', 'blue', 'grey', 'yellow', 'orange'];
+                const colors = [
+                    "red",
+                    "green",
+                    "blue",
+                    "grey",
+                    "yellow",
+                    "orange",
+                ];
                 for (const [btn, options] of Object.entries(result.buttons)) {
-                    const nodePath = document.evaluate(`.//button[contains(., '${btn}')]`, buttonContainer, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+                    const nodePath = document.evaluate(
+                        `.//button[contains(., '${btn}')]`,
+                        buttonContainer,
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    );
                     const node = nodePath.singleNodeValue;
                     if (!node) continue;
                     if (!options[0]) {
-                        node.classList.add('hidden');
+                        node.classList.add("hidden");
                         continue;
                     }
-                    const icon = node.querySelector('i');
+                    const icon = node.querySelector("i");
                     node.replaceChildren();
                     if (!node.classList.contains(`btn-${options[1]}`)) {
-                        for (c of colors) node.classList.remove(`btn-${c}`)
-                        node.classList.add(`btn-${options[1]}`)
+                        for (c of colors) node.classList.remove(`btn-${c}`);
+                        node.classList.add(`btn-${options[1]}`);
                     }
                     node.classList.add(`btn-${options[1]}`);
-                    node.append(icon, document.createTextNode(` ${options[2] ? options[2] : btn}`));
+                    node.append(
+                        icon,
+                        document.createTextNode(
+                            ` ${options[2] ? options[2] : btn}`,
+                        ),
+                    );
                 }
             });
         }
@@ -309,49 +494,57 @@ export default defineContentScript({
         function addFavShips() {
             browser.storage.sync.get("fav", function (result) {
                 if (result.fav == undefined || result.fav.length == 0) return;
-                const menu = document.querySelector('#shipyard > .window');
-                const favShips = document.createElement('section');
-                favShips.classList.add('fav-ships');
-                const favName = document.createElement('h3');
-                favName.textContent = 'Favourite ships';
+                const menu = document.querySelector("#shipyard > .window");
+                const favShips = document.createElement("section");
+                favShips.classList.add("fav-ships");
+                const favName = document.createElement("h3");
+                favName.textContent = "Favourite ships";
                 favShips.append(favName);
                 menu.append(favShips);
-                const favShipsBtn = document.createElement('select');
-                favShipsBtn.classList.add('btn', 'btn-small', 'btn-darkBlue');
-                const pc = document.createElement('option');
-                pc.textContent = 'Fav Ships';
+                const favShipsBtn = document.createElement("select");
+                favShipsBtn.classList.add("btn", "btn-small", "btn-darkBlue");
+                const pc = document.createElement("option");
+                pc.textContent = "Fav Ships";
                 favShipsBtn.append(pc);
-                result.fav.forEach(nameID => {
+                result.fav.forEach((nameID) => {
                     if (nameID[1] == 0) return;
-                    const favShip = document.createElement('div');
+                    const favShip = document.createElement("div");
                     favShip.textContent = `${nameID[0]} {${nameID[1].toUpperCase()}}`;
                     favShip.style.background = `linear-gradient(${nameID[2]}, #000 200%)`;
-                    favShip.setAttribute("onclick", "window.open('https://drednot.io/?ship=" + nameID[1] + "');")
+                    favShip.setAttribute(
+                        "onclick",
+                        "window.open('https://drednot.io/?ship=" +
+                            nameID[1] +
+                            "');",
+                    );
                     favShips.append(favShip);
 
-                    const fb = document.createElement('option');
+                    const fb = document.createElement("option");
                     fb.textContent = nameID[0];
                     fb.value = nameID[1];
                     favShipsBtn.append(fb);
                 });
                 favShipsBtn.oninput = function () {
-                    window.open(`https://drednot.io/?ship=${favShipsBtn.value}`);
+                    window.open(
+                        `https://drednot.io/?ship=${favShipsBtn.value}`,
+                    );
                     pc.selected = true;
-                }
-                if (result.fav.findIndex(b => b[1] == 0) == -1) topBar.append(favShipsBtn);
+                };
+                if (result.fav.findIndex((b) => b[1] == 0) == -1)
+                    topBar.append(favShipsBtn);
             });
         }
 
         function addChatPhrases() {
             browser.storage.sync.get("word", function (result) {
                 if (result.word == undefined || result.word.length == 0) return;
-                const wordsBox = document.createElement('select');
+                const wordsBox = document.createElement("select");
                 chatContainer.append(wordsBox);
-                const pc = document.createElement('option');
-                pc.textContent = 'Words';
+                const pc = document.createElement("option");
+                pc.textContent = "Words";
                 wordsBox.append(pc);
-                result.word.forEach(mess => {
-                    const cb = document.createElement('option');
+                result.word.forEach((mess) => {
+                    const cb = document.createElement("option");
                     cb.textContent = mess[0];
                     cb.value = mess[1];
                     wordsBox.append(cb);
@@ -359,7 +552,7 @@ export default defineContentScript({
                 wordsBox.oninput = function () {
                     sendChat(wordsBox.value);
                     pc.selected = true;
-                }
+                };
             });
         }
 
@@ -423,11 +616,13 @@ export default defineContentScript({
         browser.storage.sync.get("colors", function (result) {
             let colors;
             if (result.colors == null) {
-                colors = ['#000000', '#b7b7b7', '4d'];
-            } else
-                colors = result.colors;
-            document.body.style.setProperty('--scrollTrack', `${colors[0]}${colors[2]}`);
-            document.body.style.setProperty('--scrollThumb', colors[1]);
+                colors = ["#000000", "#b7b7b7", "4d"];
+            } else colors = result.colors;
+            document.body.style.setProperty(
+                "--scrollTrack",
+                `${colors[0]}${colors[2]}`,
+            );
+            document.body.style.setProperty("--scrollThumb", colors[1]);
         });
 
         browser.storage.sync.get("ui", function (result) {
@@ -435,7 +630,7 @@ export default defineContentScript({
             var rgb = [
                 parseInt(result.ui[0].substr(-6, 2), 16),
                 parseInt(result.ui[0].substr(-4, 2), 16),
-                parseInt(result.ui[0].substr(-2), 16)
+                parseInt(result.ui[0].substr(-2), 16),
             ];
             const bgColor = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${result.ui[1]})`;
             const r = rgb[0] * 0.2126;
@@ -443,52 +638,76 @@ export default defineContentScript({
             const b = rgb[2] * 0.0722;
             const lightness = (r + g + b) / 255;
 
-            document.body.style.setProperty('--ui', bgColor);
-            document.body.style.setProperty('--luma', (0.5 - lightness) * 100000 + '%');
+            document.body.style.setProperty("--ui", bgColor);
+            document.body.style.setProperty(
+                "--luma",
+                (0.5 - lightness) * 100000 + "%",
+            );
         });
 
         function addRejoin() {
-            const rejoinB = document.createElement('button');
-            const rejoinBtnIcon = document.createElement('i');
-            rejoinBtnIcon.classList.add('fas', 'fa-sync');
+            const rejoinB = document.createElement("button");
+            const rejoinBtnIcon = document.createElement("i");
+            rejoinBtnIcon.classList.add("fas", "fa-sync");
             rejoinB.append(rejoinBtnIcon);
-            rejoinB.append(document.createTextNode(' Rejoin Ship'));
-            rejoinB.classList.add('btn-small', 'btn-orange', 'dnone');
+            rejoinB.append(document.createTextNode(" Rejoin Ship"));
+            rejoinB.classList.add("btn-small", "btn-orange", "dnone");
             rejoinB.setAttribute("id", "rejoin_button");
             rejoinB.onclick = function () {
                 if (document.title.includes("- Deep")) {
                     exitBtn.click();
-                    rejoinShip(cShip);
+                    rejoinShip(currentShipID.value);
                 }
-            }
+            };
             buttonContainer.insertBefore(rejoinB, exitBtn);
         }
 
         function rejoinShip(name) {
-            const target = [...document.querySelectorAll('.sy-id')].filter(x => x.textContent == name)[0];
+            const target = [...document.querySelectorAll(".sy-id")].filter(
+                (x) => x.textContent == name,
+            )[0];
             if (target) return target.click();
-            document.querySelector('#shipyard section:nth-of-type(3) .btn-small').click();
+            document
+                .querySelector("#shipyard section:nth-of-type(3) .btn-small")
+                .click();
             setTimeout(() => {
                 target.click();
             }, 500);
         }
 
         //chat observer
-        observeNode(chatContent, () => {
-            const mess = document.querySelector("#chat-content > p:last-of-type");
-            if (!mess) return;
-            if (mess.textContent.includes("Joined ship '")) {
-                cShip = mess.textContent.match(/{[A-Z\d]+}/)[0];
-                if (isCaptain() && gravityShips.hasOwnProperty(cShip)) changeGravity(gravityShips[cShip]);
-            }
-            highlightAFK();
-            addTimeStamp(mess);
-            // if (chatTranslate.checked) translateChatMessage(mess);
-            // else mess.addEventListener("dblclick", () => { translateChatMessage(mess) }, { once: true });
-            // convertInvite(mess);
-            if (isCaptain()) addPlayer(mess);
-            if (mess.textContent.includes('Do The Roar!') && !mess.textContent.includes(playerID)) sendFunnyChat('roar');
-        }, true, { childList: true, attributes: false, subtree: false });
+        observeNode(
+            chatContent,
+            () => {
+                const mess = document.querySelector(
+                    "#chat-content > p:last-of-type",
+                );
+                if (!mess) return;
+                if (mess.textContent.includes("Joined ship '")) {
+                    const match = mess.textContent.match(/{[A-Z\d]+}/);
+                    if (match) currentShipID.value = match[match.length - 1];
+                    if (
+                        currentShipID.value &&
+                        isCaptain() &&
+                        gravityShips.hasOwnProperty(currentShipID.value)
+                    )
+                        changeGravity(gravityShips[currentShipID.value]);
+                }
+                highlightAFK();
+                addTimeStamp(mess);
+                // if (chatTranslate.checked) translateChatMessage(mess);
+                // else mess.addEventListener("dblclick", () => { translateChatMessage(mess) }, { once: true });
+                // convertInvite(mess);
+                if (isCaptain()) addPlayer(mess);
+                if (
+                    mess.textContent.includes("Do The Roar!") &&
+                    !mess.textContent.includes(playerID)
+                )
+                    sendFunnyChat("roar");
+            },
+            true,
+            { childList: true, attributes: false, subtree: false },
+        );
 
         //comms observer
         // observeNode(commsContent, () => {
@@ -497,7 +716,6 @@ export default defineContentScript({
         //     else mess.addEventListener("dblclick", () => { translateCommsMessage(mess) }, { once: true });
         //     // convertCommsInvite(mess);
         // }, true, { childList: true, attributes: false, subtree: false });
-
 
         // async function convertInvite(mess: string) {
         //     let link;
@@ -656,63 +874,78 @@ export default defineContentScript({
         // }
 
         function highlightAFK() {
-            if (document.visibilityState === 'hidden') {
-                if (document.querySelector("#chat-content .recent:last-of-type"))
-                    document.querySelector("#chat-content .recent:last-of-type").setAttribute('data-miss', 1)
+            if (document.visibilityState === "hidden") {
+                if (
+                    document.querySelector("#chat-content .recent:last-of-type")
+                )
+                    document
+                        .querySelector("#chat-content .recent:last-of-type")
+                        .setAttribute("data-miss", 1);
             }
         }
 
         function addTimeStamp(mess: Element) {
             const n = new Date();
-            const f = n.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            mess.setAttribute('data-time', f);
+            const f = n.toLocaleTimeString("en-US", {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            });
+            mess.setAttribute("data-time", f);
         }
 
-        const playerBox = document.createElement('div');
-        playerBox.id = 'chat-manage';
-        playerBox.classList.add('tip-list')
-        playerBox.setAttribute('tabindex', '0');
-        const plName = document.createElement('span');
-        plName.textContent = '--';
+        const playerBox = document.createElement("div");
+        playerBox.id = "chat-manage";
+        playerBox.classList.add("tip-list");
+        playerBox.setAttribute("tabindex", "0");
+        const plName = document.createElement("span");
+        plName.textContent = "--";
         playerBox.appendChild(plName);
-        const plCap = document.createElement('div');
-        plCap.addEventListener('click', () => { promote(chosenPlayer, 3) });
-        plCap.textContent = 'Captain';
-        plCap.classList.add('cyan');
+        const plCap = document.createElement("div");
+        plCap.addEventListener("click", () => {
+            promote(chosenPlayer, 3);
+        });
+        plCap.textContent = "Captain";
+        plCap.classList.add("cyan");
         playerBox.appendChild(plCap);
-        const plCrew = document.createElement('div');
-        plCrew.addEventListener('click', () => { promote(chosenPlayer, 1) });
-        plCrew.textContent = 'Crew';
-        plCrew.classList.add('yellow');
+        const plCrew = document.createElement("div");
+        plCrew.addEventListener("click", () => {
+            promote(chosenPlayer, 1);
+        });
+        plCrew.textContent = "Crew";
+        plCrew.classList.add("yellow");
         playerBox.appendChild(plCrew);
-        const plGuest = document.createElement('div');
-        plGuest.addEventListener('click', () => { promote(chosenPlayer, 0); });
-        plGuest.textContent = 'Guest';
+        const plGuest = document.createElement("div");
+        plGuest.addEventListener("click", () => {
+            promote(chosenPlayer, 0);
+        });
+        plGuest.textContent = "Guest";
         playerBox.appendChild(plGuest);
 
-        const plKick = document.createElement('div');
-        plKick.addEventListener('click', () => {
+        const plKick = document.createElement("div");
+        plKick.addEventListener("click", () => {
             sendChat(`/kick ${chosenPlayer}`);
         });
-        plKick.textContent = 'Kick';
+        plKick.textContent = "Kick";
         playerBox.appendChild(plKick);
-        const plBan = document.createElement('div');
-        plBan.addEventListener('click', () => {
+        const plBan = document.createElement("div");
+        plBan.addEventListener("click", () => {
             sendChat(`/ban ${chosenPlayer}`);
         });
-        plBan.textContent = 'Ban';
-        plBan.classList.add('red');
+        plBan.textContent = "Ban";
+        plBan.classList.add("red");
         playerBox.appendChild(plBan);
         chatContainer.appendChild(playerBox);
         var chosenPlayer: string | null = null;
 
-
         function addPlayer(mess: Element) {
-            const bdi = mess.querySelector('bdi');
+            const bdi = mess.querySelector("bdi");
             if (!bdi) return;
-            bdi.classList.add('pointer');
-            bdi.addEventListener('click', e => {
-                if (chatContainer.classList.contains('closed')) chatSendBtn.click();
+            bdi.classList.add("pointer");
+            bdi.addEventListener("click", (e) => {
+                if (chatContainer.classList.contains("closed"))
+                    chatSendBtn.click();
                 chosenPlayer = bdi.textContent;
                 plName.textContent = chosenPlayer;
                 const chatCoords = chatContainer.getBoundingClientRect();
@@ -724,70 +957,96 @@ export default defineContentScript({
 
         async function promote(user: string | null, rank: number) {
             manageBtn.click();
-            teamMenu.classList.add('hidden');
-            if (!document.querySelector('#team_players_inner tbody'))
+            teamMenu.classList.add("hidden");
+            if (!document.querySelector("#team_players_inner tbody"))
                 await swapManager(1);
-            observeNode(document.querySelector('#team_players_inner tbody'), () => {
-                const s = document.querySelectorAll('#team_players_inner td > code');
-                if (s) {
-                    const el = [...s].find(e => e.textContent == user);
-                    if (!el) return;
+            observeNode(
+                document.querySelector("#team_players_inner tbody"),
+                () => {
+                    const s = document.querySelectorAll(
+                        "#team_players_inner td > code",
+                    );
+                    if (s) {
+                        const el = [...s].find((e) => e.textContent == user);
+                        if (!el) return;
 
-                    const select = el.parentElement.parentElement.querySelector('select');
-                    if (select) {
-                        select.value = rank;
-                        select.dispatchEvent(new Event('change'));
+                        const select =
+                            el.parentElement.parentElement.querySelector(
+                                "select",
+                            );
+                        if (select) {
+                            select.value = rank;
+                            select.dispatchEvent(new Event("change"));
+                        }
                     }
-                }
-                setTimeout(() => {
-                    teamMenu.classList.remove('hidden');
-                    manageBtn.click();
-                }, 250);
-            });
+                    setTimeout(() => {
+                        teamMenu.classList.remove("hidden");
+                        manageBtn.click();
+                    }, 250);
+                },
+            );
         }
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState == 'hidden') return;
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState == "hidden") return;
             keyToggleState["'"] = keyToggleState["/"] = false;
-            document.querySelectorAll('#chat-content [data-miss]').forEach(e => {
-                setTimeout(() => { e.removeAttribute('data-miss'); }, 5000);
-            });
-        })
+            document
+                .querySelectorAll("#chat-content [data-miss]")
+                .forEach((e) => {
+                    setTimeout(() => {
+                        e.removeAttribute("data-miss");
+                    }, 5000);
+                });
+        });
 
         // chat expand bar
-        const chatExpand = document.createElement('div');
-        chatExpand.textContent = '⋯';
-        chatExpand.classList.add('chat-expand');
+        const chatExpand = document.createElement("div");
+        chatExpand.textContent = "⋯";
+        chatExpand.classList.add("chat-expand");
         // chatExpand.setAttribute('draggable', 'true');
 
-        let yStart = 0, deltaH = 0, chatMaxHeight = parseInt(getComputedStyle(chatContent).maxHeight),
+        let yStart = 0,
+            deltaH = 0,
+            chatMaxHeight = parseInt(getComputedStyle(chatContent).maxHeight),
             chatMinMaxHeight = 50;
         chatExpand.addEventListener("mousedown", (e) => {
             yStart = e.clientY;
-            chatContainer.classList.add('resizing');
+            chatContainer.classList.add("resizing");
 
             document.addEventListener("mousemove", resizeChatEvent);
-            document.addEventListener("mouseup", () => {
-                chatContainer.classList.remove('resizing');
-                document.removeEventListener("mousemove", resizeChatEvent);
-            }, { once: true });
+            document.addEventListener(
+                "mouseup",
+                () => {
+                    chatContainer.classList.remove("resizing");
+                    document.removeEventListener("mousemove", resizeChatEvent);
+                },
+                { once: true },
+            );
         });
 
         function resizeChatEvent(e: MouseEvent) {
             e.preventDefault();
-            chatMaxHeight = parseInt(getComputedStyle(chatContent).maxHeight)
+            chatMaxHeight = parseInt(getComputedStyle(chatContent).maxHeight);
             deltaH = yStart - e.clientY;
             yStart = e.clientY;
             chatMaxHeight += deltaH;
-            if (chatMaxHeight < chatMinMaxHeight) chatMaxHeight = chatMinMaxHeight;
-            else if (chatMaxHeight > chatContent.getBoundingClientRect().bottom) chatMaxHeight = chatContent.getBoundingClientRect().bottom;
-            chatContainer.style.setProperty('--chat-max-height', `${chatMaxHeight}px`);
-            chatContent.scrollTop = chatContent.scrollHeight
+            if (chatMaxHeight < chatMinMaxHeight)
+                chatMaxHeight = chatMinMaxHeight;
+            else if (chatMaxHeight > chatContent.getBoundingClientRect().bottom)
+                chatMaxHeight = chatContent.getBoundingClientRect().bottom;
+            chatContainer.style.setProperty(
+                "--chat-max-height",
+                `${chatMaxHeight}px`,
+            );
+            chatContent.scrollTop = chatContent.scrollHeight;
         }
 
         function resizeChat() {
-            chatContainer.style.setProperty('--chat-max-height', `${chatMaxHeight}px`);
-            chatContent.scrollTop = chatContent.scrollHeight
+            chatContainer.style.setProperty(
+                "--chat-max-height",
+                `${chatMaxHeight}px`,
+            );
+            chatContent.scrollTop = chatContent.scrollHeight;
         }
         browser.storage.sync.get("chatmaxheight", function (result) {
             if (result.chatmaxheight) {
@@ -796,12 +1055,11 @@ export default defineContentScript({
             }
         });
 
-
-
         chatContainer.prepend(chatExpand);
 
-
-        manageBtn.addEventListener('click', () => { managerPro(); })
+        manageBtn.addEventListener("click", () => {
+            managerPro();
+        });
 
         function managerPro() {
             if (document.getElementById("team_players")) {
@@ -810,23 +1068,56 @@ export default defineContentScript({
                 // document.querySelector('#team_menu .close button').addEventListener('click', () => {document.activeElement.blur();})
             }
             if (document.querySelector("#team_players_inner")) {
-                observeNode(document.querySelector("#team_players_inner"), () => { countCrews() }, true);
+                observeNode(
+                    document.querySelector("#team_players_inner"),
+                    () => {
+                        countCrews();
+                    },
+                    true,
+                );
             }
             if (Fmanager) return;
             Fmanager = true;
-            document.querySelectorAll('#team_menu div div:nth-of-type(2) button')[0].onclick = function () { manager = false }
-            document.querySelectorAll('#team_menu div div:nth-of-type(2) button')[1].onclick = function () { manager = true; managerPro(); countCrews(); }
+            document.querySelectorAll(
+                "#team_menu div div:nth-of-type(2) button",
+            )[0].onclick = function () {
+                manager = false;
+            };
+            document.querySelectorAll(
+                "#team_menu div div:nth-of-type(2) button",
+            )[1].onclick = function () {
+                manager = true;
+                managerPro();
+                countCrews();
+            };
         }
 
         // fixing blur issue
-        observeNode(teamMenu, () => {
-            if (teamMenu.style.display === 'none') document.activeElement.blur();
-        }, true, { childList: false, attributes: true, attributeFilter: ['style'] });
+        observeNode(
+            teamMenu,
+            () => {
+                if (teamMenu.style.display === "none")
+                    document.activeElement.blur();
+            },
+            true,
+            { childList: false, attributes: true, attributeFilter: ["style"] },
+        );
 
         function swapManager(x: number) {
             return new Promise((res, rej) => {
-                if (document.querySelectorAll('#team_menu div div:nth-of-type(2) button')[x].classList.contains('btn-green')) res(true);
-                document.querySelectorAll('#team_menu div div:nth-of-type(2) button')[x].click();
+                if (
+                    document
+                        .querySelectorAll(
+                            "#team_menu div div:nth-of-type(2) button",
+                        )
+                        [x].classList.contains("btn-green")
+                )
+                    res(true);
+                document
+                    .querySelectorAll(
+                        "#team_menu div div:nth-of-type(2) button",
+                    )
+                    [x].click();
                 observeNode(teamMenu, () => {
                     res(true);
                 });
@@ -835,39 +1126,48 @@ export default defineContentScript({
 
         function addCopter() {
             if (document.getElementById("btn-copter")) return;
-            const snakefly = document.createElement('button')
+            const snakefly = document.createElement("button");
             snakefly.classList.add("btn-purple");
             snakefly.setAttribute("id", "btn-copter");
-            snakefly.onclick = function () { zeroGravity(); }
+            snakefly.onclick = function () {
+                zeroGravity();
+            };
             snakefly.textContent = "Snakecopter";
-            document.getElementById("team_players").insertAdjacentElement('beforeEnd', snakefly);
+            document
+                .getElementById("team_players")
+                .insertAdjacentElement("beforeEnd", snakefly);
         }
 
-        var copterState = false, durin = false;
+        var copterState = false,
+            durin = false;
         async function zeroGravity() {
-            if (!manager)
-                await swapManager(1);
+            if (!manager) await swapManager(1);
             if (copterState) {
                 clearTimeout(durin);
-                return copterState = false;
+                return (copterState = false);
             }
             const inp = document.querySelector("#team_players input");
-            inp.value = 'coolsnake303';
-            inp.dispatchEvent(new Event('input'));
+            inp.value = "coolsnake303";
+            inp.dispatchEvent(new Event("input"));
             const order = [1, 0, 2, 3];
             browser.storage.sync.get("dur", function (result) {
                 let buttons = document.querySelectorAll("tr .btn-meme");
                 copterState = true;
-                durin = setTimeout(() => { copterState = false; }, result.dur == null ? 10000 : result.dur);
+                durin = setTimeout(
+                    () => {
+                        copterState = false;
+                    },
+                    result.dur == null ? 10000 : result.dur,
+                );
                 let times = 0;
                 let time = setInterval(() => {
-                    times == 0 ? times = 3 : times--;
+                    times == 0 ? (times = 3) : times--;
                     buttons[order[times % 4]].click();
                     if (!copterState) {
                         setTimeout(() => {
                             buttons[3].click();
-                            inp.value = '';
-                            inp.dispatchEvent(new Event('input'));
+                            inp.value = "";
+                            inp.dispatchEvent(new Event("input"));
                         }, 300);
                         clearInterval(time);
                     }
@@ -879,71 +1179,93 @@ export default defineContentScript({
             if (document.getElementById("stats")) return;
             const stats = document.createElement("span");
             stats.id = "stats";
-            stats.style.display = 'block';
-            document.getElementById("team_players").insertAdjacentElement('beforeEnd', stats);
+            stats.style.display = "block";
+            document
+                .getElementById("team_players")
+                .insertAdjacentElement("beforeEnd", stats);
         }
 
         function addInstantSave() {
-            const saveBtn = document.createElement('button');
-            saveBtn.classList.add('btn-small', 'btn-red', 'dnone');
-            saveBtn.id = 'instant_save';
-            const saveBtnIcon = document.createElement('i');
-            saveBtnIcon.classList.add('fas', 'fa-save');
+            const saveBtn = document.createElement("button");
+            saveBtn.classList.add("btn-small", "btn-red", "dnone");
+            saveBtn.id = "instant_save";
+            const saveBtnIcon = document.createElement("i");
+            saveBtnIcon.classList.add("fas", "fa-save");
             saveBtn.append(saveBtnIcon);
-            saveBtn.append(document.createTextNode(' Save'));
-            saveBtn.onclick = function () { saveShip() }
+            saveBtn.append(document.createTextNode(" Save"));
+            saveBtn.onclick = function () {
+                saveShip();
+            };
             buttonContainer.prepend(saveBtn);
         }
 
         function saveShip() {
-            sendChat('/save');
+            sendChat("/save");
             observeNode(disconnectPopup, () => {
-                Array.from(document.getElementsByTagName("button")).filter(btn => btn.innerText === "Return to Menu")[0].click()
+                Array.from(document.getElementsByTagName("button"))
+                    .filter((btn) => btn.innerText === "Return to Menu")[0]
+                    .click();
                 setTimeout(() => {
-                    document.querySelector('#shipyard section:nth-of-type(3) .btn-small').click();
+                    document
+                        .querySelector(
+                            "#shipyard section:nth-of-type(3) .btn-small",
+                        )
+                        .click();
                 }, 400);
             });
         }
 
         function addCopyInvite() {
-            const inviteBtn = document.createElement('button');
-            inviteBtn.classList.add('btn-small', 'btn-purple', 'dnone');
-            inviteBtn.id = 'copy_invite';
-            const inviteBtnIcon = document.createElement('i');
-            inviteBtnIcon.classList.add('fas', 'fa-copy');
+            const inviteBtn = document.createElement("button");
+            inviteBtn.classList.add("btn-small", "btn-purple", "dnone");
+            inviteBtn.id = "copy_invite";
+            const inviteBtnIcon = document.createElement("i");
+            inviteBtnIcon.classList.add("fas", "fa-copy");
             inviteBtn.append(inviteBtnIcon);
-            inviteBtn.append(document.createTextNode(' Invite'));
-            inviteBtn.onclick = function () { sendChat('/invite'); }
+            inviteBtn.append(document.createTextNode(" Invite"));
+            inviteBtn.onclick = function () {
+                sendChat("/invite");
+            };
             buttonContainer.prepend(inviteBtn);
         }
 
-        observeNode(disconnectPopup, () => {
-            const n = new Date();
-            const f = n.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            disconnectPopup.querySelector('h2').textContent = `DISCONNECTED [at ${f}]`;
-            if (disconnectPopup.querySelector('p .btn-white')) return;
+        observeNode(
+            disconnectPopup,
+            () => {
+                const n = new Date();
+                const f = n.toLocaleTimeString("en-US", {
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                });
+                disconnectPopup.querySelector("h2").textContent =
+                    `DISCONNECTED [at ${f}]`;
+                if (disconnectPopup.querySelector("p .btn-white")) return;
 
-            const btnRejoin = document.createElement('button');
-            btnRejoin.classList.add('btn', 'btn-small', 'btn-orange');
-            btnRejoin.textContent = 'Try to rejoin';
-            btnRejoin.onclick = function () {
-                disconnectPopup.querySelector('p button').click();
-                rejoinShip(cShip);
-            }
-            disconnectPopup.querySelector('p').append(btnRejoin);
+                const btnRejoin = document.createElement("button");
+                btnRejoin.classList.add("btn", "btn-small", "btn-orange");
+                btnRejoin.textContent = "Try to rejoin";
+                btnRejoin.onclick = function () {
+                    disconnectPopup.querySelector("p button").click();
+                    rejoinShip(currentShipID.value);
+                };
+                disconnectPopup.querySelector("p").append(btnRejoin);
 
-            const btnQuickChat = document.createElement('button');
-            btnQuickChat.classList.add('btn', 'btn-small', 'btn-white');
-            btnQuickChat.textContent = 'Open Chat';
-            btnQuickChat.onclick = function () {
-                chatSendBtn.click();
-            }
-            disconnectPopup.querySelector('p').append(btnQuickChat);
-
-        }, true, { childList: false, attributes: true, subtree: false });
+                const btnQuickChat = document.createElement("button");
+                btnQuickChat.classList.add("btn", "btn-small", "btn-white");
+                btnQuickChat.textContent = "Open Chat";
+                btnQuickChat.onclick = function () {
+                    chatSendBtn.click();
+                };
+                disconnectPopup.querySelector("p").append(btnQuickChat);
+            },
+            true,
+            { childList: false, attributes: true, subtree: false },
+        );
 
         const base64ToFile = (url: string) => {
-            let arr = url.split(',');
+            let arr = url.split(",");
             let mime = arr[0].match(/:(.*?);/)[1];
             let data = arr[1];
 
@@ -953,119 +1275,205 @@ export default defineContentScript({
 
             while (n--) dataArr[n] = dataStr.charCodeAt(n);
 
-            return new File([dataArr], 'File.zip', { type: mime });
+            return new File([dataArr], "File.zip", { type: mime });
         };
 
         var fileEvent: DragEvent;
         browser.storage.local.get("txt", function (result) {
             if (result.txt == null) {
                 fetch(browser.runtime.getURL("shrekPack.zip"))
-                    .then(res => res.blob())
-                    .then(blob => {
+                    .then((res) => res.blob())
+                    .then((blob) => {
                         const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(new File([blob], 'txt.zip', { type: "application/x-zip-compressed" }));
-                        fileEvent = new DragEvent('drop', { dataTransfer })
+                        dataTransfer.items.add(
+                            new File([blob], "txt.zip", {
+                                type: "application/x-zip-compressed",
+                            }),
+                        );
+                        fileEvent = new DragEvent("drop", { dataTransfer });
                     });
                 return;
             }
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(base64ToFile(result.txt));
-            fileEvent = new DragEvent('drop', { dataTransfer });
+            fileEvent = new DragEvent("drop", { dataTransfer });
         });
 
         function switchTXT() {
             if (!fileEvent) return;
-            if (localStorage.getItem("txt") == undefined) localStorage.setItem("txt", 'f');
-            if (localStorage.getItem("txt") == 't') {
-                localStorage.setItem("txt", 'f');
-                document.evaluate('//button[text()=" Settings"]', teamMenu, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
-                document.evaluate('//button[text()="Modify Assets"]', teamMenu, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
-                document.evaluate('//button[text()="Clear X"]', teamMenu, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
-                document.evaluate('//button[text()="Okay"]', document.querySelector(".modal-container"), null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+            if (localStorage.getItem("txt") == undefined)
+                localStorage.setItem("txt", "f");
+            if (localStorage.getItem("txt") == "t") {
+                localStorage.setItem("txt", "f");
+                document
+                    .evaluate(
+                        '//button[text()=" Settings"]',
+                        teamMenu,
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    )
+                    .singleNodeValue.click();
+                document
+                    .evaluate(
+                        '//button[text()="Modify Assets"]',
+                        teamMenu,
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    )
+                    .singleNodeValue.click();
+                document
+                    .evaluate(
+                        '//button[text()="Clear X"]',
+                        teamMenu,
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    )
+                    .singleNodeValue.click();
+                document
+                    .evaluate(
+                        '//button[text()="Okay"]',
+                        document.querySelector(".modal-container"),
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    )
+                    .singleNodeValue.click();
                 document.querySelector("#new-ui-left button").click();
             } else {
-                localStorage.setItem("txt", 't');
+                localStorage.setItem("txt", "t");
                 window.dispatchEvent(fileEvent);
-                document.evaluate('//button[text()="Okay"]', document.querySelector(".modal-container"), null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+                document
+                    .evaluate(
+                        '//button[text()="Okay"]',
+                        document.querySelector(".modal-container"),
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE,
+                        null,
+                    )
+                    .singleNodeValue.click();
             }
         }
 
         function addBtnServer() {
-            const serverSection = document.querySelector("#shipyard section:nth-of-type(1)");
-            const options = document.querySelectorAll("#shipyard select option");
+            const serverSection = document.querySelector(
+                "#shipyard section:nth-of-type(1)",
+            );
+            const options = document.querySelectorAll(
+                "#shipyard select option",
+            );
             const servBtns = [];
             const servStats = [];
 
             options.forEach((server, index) => {
                 const serverData = getServerData(server.textContent);
-                const serverBox = document.createElement('div');
-                serverBox.classList.add('server-box', 'server-offline');
-                const serverHeader = document.createElement('h4');
+                const serverBox = document.createElement("div");
+                serverBox.classList.add("server-box", "server-offline");
+                const serverHeader = document.createElement("h4");
                 serverHeader.textContent = serverData[1];
-                serverBox.onclick = () => { changeServer(index) };
+                serverBox.onclick = () => {
+                    changeServer(index);
+                };
 
-                const serverUsers = document.createElement('p');
-                const serverPing = document.createElement('p');
-                serverUsers.textContent = '';
-                serverPing.textContent = 'Loading...';
+                const serverUsers = document.createElement("p");
+                const serverPing = document.createElement("p");
+                serverUsers.textContent = "";
+                serverPing.textContent = "Loading...";
 
                 serverBox.append(serverHeader, serverUsers, serverPing);
-                serverSection.insertAdjacentElement('beforeEnd', serverBox);
+                serverSection.insertAdjacentElement("beforeEnd", serverBox);
                 servBtns.push(serverBox);
                 servStats.push(serverUsers, serverPing);
             });
 
-            serverSection.querySelectorAll("#shipyard section:nth-of-type(1) div")[JSON.parse(localStorage.getItem("dredark_user_settings")).preferred_server].classList.add("server-selected");
+            serverSection
+                .querySelectorAll("#shipyard section:nth-of-type(1) div")
+                [
+                    JSON.parse(localStorage.getItem("dredark_user_settings"))
+                        .preferred_server
+                ].classList.add("server-selected");
 
-            observeNode(document.querySelector("#shipyard section:nth-of-type(1) select"), () => {
-                for (let i = 0; i < servBtns.length; i++) {
-                    const info = getServerData(options[i].textContent);
+            observeNode(
+                document.querySelector(
+                    "#shipyard section:nth-of-type(1) select",
+                ),
+                () => {
+                    for (let i = 0; i < servBtns.length; i++) {
+                        const info = getServerData(options[i].textContent);
 
-                    if (info[2] === 'No Response') {
-                        servBtns[i].classList.add('server-offline');
-                        servBtns[i].style = `--server-box-fill: 100%`;
-                        servStats[i * 2].textContent = 'No Response';
-                        servStats[i * 2 + 1].textContent = '';
-                    } else {
-                        servBtns[i].classList.remove('server-offline');
+                        if (info[2] === "No Response") {
+                            servBtns[i].classList.add("server-offline");
+                            servBtns[i].style = `--server-box-fill: 100%`;
+                            servStats[i * 2].textContent = "No Response";
+                            servStats[i * 2 + 1].textContent = "";
+                        } else {
+                            servBtns[i].classList.remove("server-offline");
 
-                        const users = info[2].split(' / ');
-                        const fill = parseInt(users[0]) / parseInt(users[1]) * 100;
-                        servBtns[i].style = `--server-box-fill: ${fill}%`;
-                        servStats[i * 2].textContent = info[2];
-                        servStats[i * 2 + 1].textContent = info[3];
+                            const users = info[2].split(" / ");
+                            const fill =
+                                (parseInt(users[0]) / parseInt(users[1])) * 100;
+                            servBtns[i].style = `--server-box-fill: ${fill}%`;
+                            servStats[i * 2].textContent = info[2];
+                            servStats[i * 2 + 1].textContent = info[3];
+                        }
                     }
-                }
-            }, true);
+                },
+                true,
+            );
         }
 
         const getServerData = (text: string) => {
-            const serverData = text.split(' - ');
+            const serverData = text.split(" - ");
             return serverData;
-        }
+        };
 
         function changeServer(server: number) {
-            document.querySelectorAll("#shipyard select option")[server].selected = 'selected';
-            document.querySelector("#shipyard select").dispatchEvent(new Event('change'));
-            document.querySelectorAll("#shipyard section:nth-of-type(1) div").forEach(element => {
-                element.classList.remove("server-selected");
-            });
-            document.querySelectorAll("#shipyard section:nth-of-type(1) div")[server].classList.add("server-selected");
+            document.querySelectorAll("#shipyard select option")[
+                server
+            ].selected = "selected";
+            document
+                .querySelector("#shipyard select")
+                .dispatchEvent(new Event("change"));
+            document
+                .querySelectorAll("#shipyard section:nth-of-type(1) div")
+                .forEach((element) => {
+                    element.classList.remove("server-selected");
+                });
+            document
+                .querySelectorAll("#shipyard section:nth-of-type(1) div")
+                [server].classList.add("server-selected");
         }
 
         function countCrews() {
             if (!document.getElementById("stats")) return;
             let count = [0, 0, 0, 0];
-            document.querySelectorAll("#team_players_inner select").forEach(s => {
-                count[s.value]++;
-            });
-            document.querySelectorAll("#team_players_inner b[style='color: cyan;']").forEach(function () { count[3]++; })
-            document.querySelectorAll("#team_players_inner b[style='color: red;']").forEach(function () { count[2]++; })
-            const crewCount = [['Captains', 'cyan', count[3]], ['Crews', 'yellow', count[1]], ['Guests', 'white', count[0]], ['Banned', 'red', count[2]]];
+            document
+                .querySelectorAll("#team_players_inner select")
+                .forEach((s) => {
+                    count[s.value]++;
+                });
+            document
+                .querySelectorAll("#team_players_inner b[style='color: cyan;']")
+                .forEach(function () {
+                    count[3]++;
+                });
+            document
+                .querySelectorAll("#team_players_inner b[style='color: red;']")
+                .forEach(function () {
+                    count[2]++;
+                });
+            const crewCount = [
+                ["Captains", "cyan", count[3]],
+                ["Crews", "yellow", count[1]],
+                ["Guests", "white", count[0]],
+                ["Banned", "red", count[2]],
+            ];
             const stats = document.getElementById("stats");
             const crewChildren = [];
-            crewCount.forEach(el => {
-                const b = document.createElement('b');
+            crewCount.forEach((el) => {
+                const b = document.createElement("b");
                 b.textContent = ` ${el[0]}: ${el[2]}`;
                 b.style.color = el[1];
                 crewChildren.push(b);
@@ -1079,14 +1487,16 @@ export default defineContentScript({
             if (showPlayerListCooldown) return;
             showPlayerListCooldown = true;
 
-            if (chatContainer.classList.contains('closed')) chatSendBtn.click();
-            chatInput.value = '/kick ';
-            chatInput.dispatchEvent(new Event('input'));
-            const players = [...document.querySelectorAll('#chat-autocomplete p')];
-            document.querySelector('#chat-close').click();
-            const playerList = document.createElement('p');
-            playerList.classList.add('recent');
-            const plListB = document.createElement('b');
+            if (chatContainer.classList.contains("closed")) chatSendBtn.click();
+            chatInput.value = "/kick ";
+            chatInput.dispatchEvent(new Event("input"));
+            const players = [
+                ...document.querySelectorAll("#chat-autocomplete p"),
+            ];
+            document.querySelector("#chat-close").click();
+            const playerList = document.createElement("p");
+            playerList.classList.add("recent");
+            const plListB = document.createElement("b");
             playerList.append(plListB);
             chatContent.append(playerList);
 
@@ -1094,13 +1504,12 @@ export default defineContentScript({
             if (players.length === 0) {
                 plListB.textContent = `It's only you here.`;
                 cooldown = 1000;
-            }
-            else {
+            } else {
                 plListB.textContent = `There are ${players.length} more players in the ship:`;
-                const plListUl = document.createElement('ul');
+                const plListUl = document.createElement("ul");
                 for (let player of players) {
-                    const plListLi = document.createElement('li');
-                    const plListBdi = document.createElement('bdi');
+                    const plListLi = document.createElement("li");
+                    const plListBdi = document.createElement("bdi");
                     plListBdi.textContent = player.textContent;
                     plListLi.append(plListBdi);
                     plListUl.append(plListLi);
@@ -1109,27 +1518,34 @@ export default defineContentScript({
                 playerList.append(plListUl);
             }
             setTimeout(() => {
-                playerList.classList.remove('recent');
+                playerList.classList.remove("recent");
                 showPlayerListCooldown = false;
-            }, cooldown)
-            if (chatContainer.classList.contains('closed')) chatContent.scrollTop = chatContent.scrollHeight;
+            }, cooldown);
+            if (chatContainer.classList.contains("closed"))
+                chatContent.scrollTop = chatContent.scrollHeight;
         }
 
         async function changeGravity(direction: number) {
             if (!manager) {
                 await swapManager(1);
             }
-            const inp: HTMLInputElement | null = document.querySelector("#team_players input");
+            const inp: HTMLInputElement | null = document.querySelector(
+                "#team_players input",
+            );
             if (!inp) return;
-            inp.value = 'coolsnake303';
-            inp.dispatchEvent(new Event('input'));
-            observeNode(document.querySelector('#team_players_inner table'), () => {
-                document.querySelectorAll("tr .btn-meme")[direction].click();
-                inp.value = '';
-                inp.dispatchEvent(new Event('input'));
-            });
+            inp.value = "coolsnake303";
+            inp.dispatchEvent(new Event("input"));
+            observeNode(
+                document.querySelector("#team_players_inner table"),
+                () => {
+                    document
+                        .querySelectorAll("tr .btn-meme")
+                        [direction].click();
+                    inp.value = "";
+                    inp.dispatchEvent(new Event("input"));
+                },
+            );
         }
-
 
         // async function emergencyPing(url: string, mess: string, senderUsername: string) {
         //     if (!document.title.includes("- Deep")) return;
